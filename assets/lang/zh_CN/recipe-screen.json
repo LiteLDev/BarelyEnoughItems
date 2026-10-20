@@ -1,0 +1,15 @@
+{
+    "bei.recipe.shapeless": "无序配方",
+    "bei.recipe.alternatives": "可接受 {} 种物品中的任意一种",
+    "bei.recipe.workstation": "工作站",
+    "bei.recipe.id": "配方：{}",
+    "bei.recipe.count": "配方数：{}",
+    "bei.recipe.transfer": "移动材料",
+    "bei.recipe.transfer.missing": "缺少材料",
+    "bei.recipe.transfer.max": "Shift+点击：尽可能多地移动",
+    "bei.recipe.close": "关闭（Esc）",
+    "bei.recipe.category.prev": "上一个类别",
+    "bei.recipe.category.next": "下一个类别",
+    "bei.recipe.page.prev": "上一页",
+    "bei.recipe.page.next": "下一页"
+}

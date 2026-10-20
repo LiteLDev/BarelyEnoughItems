@@ -1,0 +1,15 @@
+{
+    "bei.recipe.shapeless": "Shapeless recipe",
+    "bei.recipe.alternatives": "Accepts any of {} items",
+    "bei.recipe.workstation": "Workstation",
+    "bei.recipe.id": "Recipe: {}",
+    "bei.recipe.count": "Recipes: {}",
+    "bei.recipe.transfer": "Move ingredients",
+    "bei.recipe.transfer.missing": "Missing ingredients",
+    "bei.recipe.transfer.max": "Shift-click: move as many as possible",
+    "bei.recipe.close": "Close (Esc)",
+    "bei.recipe.category.prev": "Previous category",
+    "bei.recipe.category.next": "Next category",
+    "bei.recipe.page.prev": "Previous page",
+    "bei.recipe.page.next": "Next page"
+}
