@@ -1,0 +1,13 @@
+{
+    "bei.crafting.note.map_cloning": "Combine a filled map with empty maps to copy it.",
+    "bei.crafting.note.map_extending": "Surround a filled map with paper to zoom it out.",
+    "bei.crafting.note.map_upgrading": "Combine a map with a compass to turn it into a locator map that shows player markers.",
+    "bei.crafting.note.map_locking": "Combine a filled map with a glass pane to lock it.",
+    "bei.crafting.note.book_cloning": "Combine a written book with books and quills to copy it.",
+    "bei.crafting.note.banner_duplicate": "Copies the pattern of a banner onto a blank banner of the same color.",
+    "bei.crafting.note.banner_add_pattern": "Arrange dyes around a banner to add a pattern.",
+    "bei.crafting.note.firework_star": "Add dyes and optional effect items (diamond, glowstone dust, feather, gold nugget, head...) to choose the explosion.",
+    "bei.crafting.note.firework_rocket": "Use 1 to 3 gunpowder for longer flights; firework stars are optional.",
+    "bei.crafting.note.decorated_pot": "Any mix of bricks and pottery sherds; each sherd decorates one side.",
+    "bei.crafting.note.shield": "Applies a banner's pattern to a shield."
+}
