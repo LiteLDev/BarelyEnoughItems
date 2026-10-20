@@ -1,0 +1,52 @@
+name: Bug report
+description: Something in BEI does not work as expected
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open the inventory
+        2. Hover ...
+        3. Press R
+    validations:
+      required: true
+  - type: input
+    id: bei
+    attributes:
+      label: BEI version
+      placeholder: 0.1.0
+    validations:
+      required: true
+  - type: input
+    id: levilamina
+    attributes:
+      label: LeviLamina version
+      placeholder: 26.51.7
+    validations:
+      required: true
+  - type: input
+    id: minecraft
+    attributes:
+      label: Minecraft version
+      placeholder: 1.26.51.01
+    validations:
+      required: true
+  - type: textarea
+    id: log
+    attributes:
+      label: Log
+      description: Relevant lines from `logs/latest.log` in the game folder (lines with `[BEI]`, errors, crash reports).
+      render: text
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
