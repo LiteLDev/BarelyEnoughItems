@@ -37,7 +37,7 @@ public:
         info.fallbackTitle = "Brewing";
         info.layout        = core::LayoutKind::Brewing;
         info.workstations  = {
-            core::ItemKey{"minecraft:brewing_stand", 0}
+            core::ItemKey{"minecraft:brewing_stand", core::ItemKey::ANY_AUX}
         };
         info.order = 40;
         out.push_back(std::move(info));

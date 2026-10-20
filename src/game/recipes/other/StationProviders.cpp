@@ -26,7 +26,7 @@ core::CategoryInfo makeCategory(
     info.fallbackTitle = fallbackTitle;
     info.layout        = layout;
     info.workstations  = {
-        core::ItemKey{workstation, 0}
+        core::ItemKey{workstation, core::ItemKey::ANY_AUX}
     };
     info.order = order;
     return info;

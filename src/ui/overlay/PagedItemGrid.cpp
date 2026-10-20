@@ -46,28 +46,22 @@ bool activateItem(core::ItemKey const& item, MouseButton button) {
     }
 }
 
-bool PagedItemGrid::layout(core::Rect const& area, float bottomReserve, int maxColumns) {
-    core::Rect gridArea{
-        area.x,
-        area.y + HEADER_H + GAP,
-        area.w,
-        std::max(0.f, area.h - HEADER_H - GAP - bottomReserve)
-    };
+bool PagedItemGrid::layout(core::Rect const& header, core::Rect const& gridArea, int maxColumns) {
     mGrid  = core::fitGrid(gridArea, CELL, maxColumns);
-    mShown = mGrid.cols >= MIN_COLS && mGrid.rows >= 1;
+    mShown = mGrid.cols >= MIN_COLS && mGrid.rows >= 1 && !header.empty();
     if (!mShown) {
         mBounds = {};
         return false;
     }
     float left  = mGrid.bounds.x;
     float right = mGrid.bounds.right();
-    mPrev.rect  = {left, area.y, BUTTON_W, HEADER_H};
-    mNext.rect  = {right - BUTTON_W, area.y, BUTTON_W, HEADER_H};
+    mPrev.rect  = {left, header.y, BUTTON_W, header.h};
+    mNext.rect  = {right - BUTTON_W, header.y, BUTTON_W, header.h};
     if (mPrev.label.empty()) {
         mPrev.label = "<";
         mNext.label = ">";
     }
-    mBounds = {left, area.y, right - left, mGrid.bounds.bottom() - area.y};
+    mBounds = {left, header.y, right - left, mGrid.bounds.bottom() - header.y};
     mPages.perPage = std::max(1, mGrid.capacity());
     mPages.clamp();
     return true;
@@ -132,7 +126,7 @@ void PagedItemGrid::render(Painter& p, FrameInfo const& frame, std::string const
     p.text(
         mPageLabel,
         mBounds.x + mBounds.w / 2,
-        mBounds.y + (HEADER_H - p.lineHeight()) / 2 + 1,
+        mPrev.rect.y + (mPrev.rect.h - p.lineHeight()) / 2 + 1,
         palette::TEXT_LIGHT,
         1,
         TextAlign::Center

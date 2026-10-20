@@ -34,7 +34,13 @@ core::OverlayLayout overlayLayout(FrameInfo const& frame) {
         used.x      = left;
         used.w      = right - left;
     }
-    return core::computeOverlayLayout(frame.screen.w, frame.screen.h, used);
+    core::OverlayLayoutOptions options;
+    options.cell                    = PagedItemGrid::CELL;
+    options.pageControlsHeight      = PagedItemGrid::HEADER_H;
+    options.searchBarHeight         = 16;
+    options.centerSearchBar         = app::Controller::get().config().centerSearchBar;
+    options.centerSearchBarMaxWidth = frame.container.w;
+    return core::computeOverlayLayout(frame.screen.w, frame.screen.h, used, options);
 }
 
 bool reopened(FrameInfo const& frame, double& lastTime) {

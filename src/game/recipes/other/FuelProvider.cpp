@@ -46,9 +46,9 @@ public:
         info.fallbackTitle = "Fuel";
         info.layout        = core::LayoutKind::Generic;
         info.workstations  = {
-            core::ItemKey{"minecraft:furnace",       0},
-            core::ItemKey{"minecraft:blast_furnace", 0},
-            core::ItemKey{"minecraft:smoker",        0},
+            core::ItemKey{"minecraft:furnace",       core::ItemKey::ANY_AUX},
+            core::ItemKey{"minecraft:blast_furnace", core::ItemKey::ANY_AUX},
+            core::ItemKey{"minecraft:smoker",        core::ItemKey::ANY_AUX},
         };
         info.order = 60;
         out.push_back(std::move(info));

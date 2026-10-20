@@ -5,6 +5,7 @@
 #include "game/Game.h"
 #include "game/items/ItemCatalog.h"
 #include "mod/Log.h"
+#include "ui/overlay/ItemListPanel.h"
 
 #include "ll/api/memory/Hook.h"
 
@@ -63,7 +64,7 @@ LL_TYPE_INSTANCE_HOOK(
     ll::memory::HookPriority::Normal,
     CraftingScreenController,
     &CraftingScreenController::$tick,
-    ui::DirtyFlag
+    ::ui::DirtyFlag
 ) {
     setCrafting(this);
     return origin();
@@ -245,12 +246,24 @@ void Actions::install() {
     CraftingTickHook::hook();
     CraftingTerminateHook::hook();
     ContainerScreenDtorHook::hook();
+    // JEI: in cheat mode a click on a panel item while holding a stack deletes the stack (creative only;
+    // in survival the click does nothing, so nothing is given or opened while an item is held).
+    ui::ItemListPanel::cheatClickHook = [](ui::MouseButton button, bool down, float, float) {
+        auto& actions = Actions::get();
+        if (button == ui::MouseButton::Middle || !actions.hasCursorItem()) return false;
+        if (down && actions.canDeleteCursorItem()) {
+            bool const deleted = actions.deleteCursorItem();
+            log().info("Actions: cursor item {} over a BEI panel", deleted ? "deleted" : "could not be deleted");
+        }
+        return true;
+    };
 #ifdef BEI_DEV
     dev::install();
 #endif
 }
 
 void Actions::uninstall() {
+    ui::ItemListPanel::cheatClickHook = nullptr;
 #ifdef BEI_DEV
     dev::uninstall();
 #endif

@@ -20,6 +20,7 @@ void Controller::load(std::filesystem::path configDir) {
 }
 
 void Controller::save() const {
+    mSavePending = false;
     if (mConfigDir.empty()) return;
     mConfig.save(mConfigDir / "config.json");
     mBookmarks.save(mConfigDir / "bookmarks.json");
@@ -27,8 +28,7 @@ void Controller::save() const {
 
 bool Controller::show(core::RecipeFocus focus) {
     auto& index = game::RecipeManager::get().index();
-    bool  any   = focus.item.empty() ? !index.recipesInCategory(focus.category).empty()
-                                     : !index.lookup(focus.item, focus.mode).empty();
+    bool  any   = focus.item.empty() ? index.categorySize(focus.category) > 0 : index.has(focus.item, focus.mode);
     if (!any) return false;
     mHistory.push(focus);
     ui::RecipeScreen::get().show(*mHistory.current());
@@ -76,6 +76,14 @@ void Controller::toggleOverlay() {
 void Controller::setSearchText(std::string text) {
     if (text == mConfig.lastSearch) return;
     mConfig.lastSearch = std::move(text);
+    // Saved by tick() once typing stops, not on every keystroke.
+    mSavePending  = true;
+    mLastSearchAt = std::chrono::steady_clock::now();
+}
+
+void Controller::tick(bool typing) {
+    if (!mSavePending) return;
+    if (typing && std::chrono::steady_clock::now() - mLastSearchAt < SEARCH_SAVE_DELAY) return;
     save();
 }
 

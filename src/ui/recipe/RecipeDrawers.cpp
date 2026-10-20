@@ -177,7 +177,16 @@ void draw(core::LayoutKind kind, core::RecipeView const& recipe, float x, float 
     float ox   = std::floor(x + (cell.w - size.w) / 2);
     layout(kind, recipe, ox, y, &ctx);
     if (!recipe.note.empty()) {
-        ctx.painter.text(noteText(recipe), x + cell.w / 2, y + size.h + 2, palette::TEXT, 1, TextAlign::Center);
+        auto  text  = noteText(recipe);
+        float cx    = x + cell.w / 2;
+        float scale = 1;
+        if (ctx.noteRight > ctx.noteLeft) {
+            float room = ctx.noteRight - ctx.noteLeft;
+            float w    = ctx.painter.textWidth(text);
+            if (w > room) scale = room / w, w = room;
+            cx = std::clamp(cx, ctx.noteLeft + w / 2, ctx.noteRight - w / 2);
+        }
+        ctx.painter.text(text, cx, y + size.h + 2, palette::TEXT, scale, TextAlign::Center);
     }
 }
 
