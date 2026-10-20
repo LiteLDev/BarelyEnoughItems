@@ -402,10 +402,12 @@ bool Actions::give(core::ItemKey const& item, int count) {
     return sendCommand(std::move(cmd));
 }
 
-bool Actions::hasCursorItem() const {
+ItemStack const* Actions::cursorItem() const {
     auto* mgr = manager();
-    return mgr && cursorStack(*mgr);
+    return mgr ? cursorStack(*mgr) : nullptr;
 }
+
+bool Actions::hasCursorItem() const { return cursorItem() != nullptr; }
 
 bool Actions::canDeleteCursorItem() const {
     auto* player = game::currentPlayer();

@@ -1,4 +1,5 @@
 // Pieces shared by the overlay panels: visibility rule and the hover tooltip layer.
+#include "actions/Actions.h"
 #include "app/Controller.h"
 #include "app/I18n.h"
 #include "ui/UiRoot.h"
@@ -6,6 +7,8 @@
 #include "ui/overlay/PagedItemGrid.h"
 #include "ui/recipe/RecipeScreen.h"
 #include "ui/widgets/Tooltip.h"
+
+#include "mc/world/item/ItemStack.h"
 
 #include <algorithm>
 #include <optional>
@@ -79,10 +82,32 @@ private:
     std::vector<TooltipLine> mExtra;
 };
 OverlayTooltipLayer gTooltipLayer;
+
+/// The stack held on the vanilla cursor, drawn again above the overlay panels (and above the
+/// vanilla tooltips BEI defers past them), where vanilla draws it with the screen. It covers the
+/// vanilla icon exactly: same size, centered on the cursor.
+class CursorStackLayer final : public IUiLayer {
+public:
+    [[nodiscard]] char const* name() const override { return "cursor_stack"; }
+    [[nodiscard]] int         zOrder() const override { return UiRoot::VANILLA_OVERLAY_Z + 100; }
+    [[nodiscard]] bool        visible(FrameInfo const& frame) const override {
+        return overlayAllowed(frame) && frame.mouseX >= 0 && actions::Actions::get().hasCursorItem();
+    }
+
+    void render(Painter& p, FrameInfo const& frame) override {
+        auto const* stack = actions::Actions::get().cursorItem();
+        if (!stack) return;
+        float x = frame.mouseX - 8, y = frame.mouseY - 8;
+        p.itemStack(*stack, x, y);
+        p.count(stack->mCount, x, y);
+    }
+};
+CursorStackLayer gCursorStackLayer;
 } // namespace
 
 void requestItemTooltip(core::ItemKey const& item) { gPending = item; }
 
 BEI_REGISTER_UI_LAYER(gTooltipLayer);
+BEI_REGISTER_UI_LAYER(gCursorStackLayer);
 
 } // namespace bei::ui
