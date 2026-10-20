@@ -10,8 +10,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Composting category: every compostable item with its chance to raise the compost level.
+- Settings button (wrench) next to the item list search bar: a popup with every option (cheat mode, bookmark panel, bookmark order, search bar position, item ids and mod name in tooltips, remember page, all containers, max columns). Ctrl+click toggles cheat mode; the button is red while it is on.
+- `Ctrl` + `F` focuses the search bar (the key is remappable in Settings > Keyboard & Mouse).
+- Search history: `↑` / `↓` in the search bar recall the last 20 searches, saved in `config.json`.
 
 ### Fixed
+
+- The stack held on the cursor in chests, furnaces and other containers was drawn under the BEI panels, and in cheat mode clicking a panel item while holding it gave the item.
+- The "show item ids", "show mod name", "add bookmarks to the front" and "remember page" options in `config.json` had no effect.
 
 - Data-driven fuels such as coal and charcoal were missing from the Fuel category and from the smelting fuel slots.
 
