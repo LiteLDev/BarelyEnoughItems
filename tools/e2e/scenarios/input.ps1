@@ -29,6 +29,10 @@ Save-Screenshot 'hover-vanilla' $u | Out-Null
 Assert-Hotkey R 'Hotkey show_recipes on minecraft:oak_log' 'on a vanilla slot'
 Assert-Hotkey U 'Hotkey show_uses on minecraft:oak_log' 'on a vanilla slot'
 Write-Step 'R/U on vanilla slot ok'
+# Oak logs have uses: U opened the recipe screen. Esc closes it (back to the inventory).
+Press-Key ESC; Start-Sleep -Milliseconds 600
+Move-Mouse 0.6 0.6 -Relative; Start-Sleep -Milliseconds 300     # leave and re-enter the slot so
+Move-Mouse 0.506 0.732 -Relative; Start-Sleep -Milliseconds 400 # vanilla reports the hover again
 
 # Holding a key (OS auto-repeat) acts once.
 $before = Count-Log 'Hotkey show_recipes on'
@@ -62,6 +66,7 @@ Start-Sleep -Milliseconds 300
 function Sorted([string]$json) { (($json | ConvertFrom-Json).items | Sort-Object) -join ',' }
 if ((Sorted (Read-Bookmarks)) -ne (Sorted $bm0)) { Fail 'second A did not restore the bookmark set' }
 Assert-Hotkey R 'Hotkey show_recipes on' 'on the item panel'
+Press-Key ESC; Start-Sleep -Milliseconds 600   # close the recipe screen R opened
 
 # Wheel over the panel (swallowed, routed to BEI) and over the vanilla inventory.
 Move-Mouse 0.9 0.4 -Relative
