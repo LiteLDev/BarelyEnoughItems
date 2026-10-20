@@ -1,0 +1,7 @@
+{
+    "bei.actions.transfer.move": "移动物品",
+    "bei.actions.transfer.moveAll": "Shift+点击：尽可能多地移动",
+    "bei.actions.transfer.missing": "缺少物品",
+    "bei.actions.transfer.noGrid": "打开工作台（2x2 配方也可在物品栏中）以移动物品",
+    "bei.actions.transfer.tooLarge": "此配方需要工作台"
+}
