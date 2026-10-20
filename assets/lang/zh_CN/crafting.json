@@ -1,0 +1,13 @@
+{
+    "bei.crafting.note.map_cloning": "将已填充的地图与空地图合成即可复制地图。",
+    "bei.crafting.note.map_extending": "用纸围住已填充的地图可缩小其比例。",
+    "bei.crafting.note.map_upgrading": "将地图与指南针合成可将其升级为显示玩家标记的定位地图。",
+    "bei.crafting.note.map_locking": "将已填充的地图与玻璃板合成可锁定地图。",
+    "bei.crafting.note.book_cloning": "将成书与书与笔合成即可复制成书。",
+    "bei.crafting.note.banner_duplicate": "将旗帜的图案复制到同色的空白旗帜上。",
+    "bei.crafting.note.banner_add_pattern": "在旗帜周围摆放染料以添加图案。",
+    "bei.crafting.note.firework_star": "加入染料及可选的效果物品（钻石、萤石粉、羽毛、金粒、头颅等）来决定爆炸效果。",
+    "bei.crafting.note.firework_rocket": "使用 1 到 3 个火药可增加飞行时长；烟火之星为可选。",
+    "bei.crafting.note.decorated_pot": "可任意组合红砖与陶片；每块陶片装饰一面。",
+    "bei.crafting.note.shield": "将旗帜的图案应用到盾牌上。"
+}
