@@ -12,6 +12,7 @@
 #include "mc/client/gui/controls/VisualTree.h"
 #include "mc/client/gui/screens/ScreenController.h"
 #include "mc/client/gui/screens/ScreenView.h"
+#include "mc/client/gui/screens/UIScene.h"
 #include "mc/client/gui/screens/controllers/ContainerScreenController.h"
 #include "mc/client/renderer/screen/MinecraftUIRenderContext.h"
 
@@ -55,6 +56,16 @@ void UiRoot::install() {
     gAfterRender = ll::event::EventBus::getInstance().emplaceListener<ll::event::AfterUIRenderEvent>([this](auto& ev) {
         auto& view = ev.screenView();
         if (!view.mHasFocus) return;
+        // Several screen views render with focus in one frame (e.g. "toast_screen" after
+        // "inventory_screen"). Only the top-most scene hosts BEI; otherwise the later pass
+        // replaces the hit-test state of the screen the player is looking at, and hover
+        // hotkeys (R/U/A) find nothing.
+        auto* client = game::currentClient();
+        if (client) {
+            auto top   = client->getTopScreenName();
+            auto scene = ev.uiRenderContext().mCurrentScene.getScreenName();
+            if (!top.empty() && scene != top) return;
+        }
         try {
             renderFrame(view, ev.uiRenderContext());
         } catch (std::exception const& e) {
