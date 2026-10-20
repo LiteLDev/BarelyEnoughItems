@@ -21,8 +21,9 @@ struct TooltipLine {
 /// Call after everything else in the frame was flushed so it stays on top.
 void drawTooltip(Painter& painter, std::vector<TooltipLine> const& lines, float x, float y, FrameInfo const& frame);
 
-/// Item tooltip: localized name, extra lines (e.g. "Recipe: 3/9"), id + namespace in grey,
-/// and the hotkey hint ("R: Recipes  U: Uses").
+/// Item tooltip: localized name (white), extra lines (e.g. "Recipe: 3/9"), the id in grey,
+/// the hotkey hint ("R: Recipes  U: Uses"), and the namespace as a mod name in blue (like JEI).
+/// Long lines wrap; the tooltip flushes the painter first so it is always on top.
 void drawItemTooltip(
     Painter&                        painter,
     core::ItemKey const&            item,

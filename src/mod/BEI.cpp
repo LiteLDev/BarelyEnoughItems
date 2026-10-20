@@ -9,6 +9,7 @@
 #include "mod/Log.h"
 #include "ui/UiRoot.h"
 #include "ui/recipe/RecipeScreen.h"
+#include "ui/widgets/TextInput.h"
 
 #include "ll/api/mod/RegisterHelper.h"
 
@@ -33,6 +34,7 @@ bool BEI::enable() {
     game::ItemCatalog::get().install();
     game::RecipeManager::get().install();
     ui::UiRoot::get().install();
+    ui::TextInput::install();
     ui::RecipeScreen::get().install();
     input::InputRouter::get().install();
     actions::Actions::get().install();
@@ -44,6 +46,7 @@ bool BEI::disable() {
     actions::Actions::get().uninstall();
     input::InputRouter::get().uninstall();
     ui::RecipeScreen::get().uninstall();
+    ui::TextInput::uninstall();
     ui::UiRoot::get().uninstall();
     game::RecipeManager::get().uninstall();
     game::ItemCatalog::get().uninstall();
