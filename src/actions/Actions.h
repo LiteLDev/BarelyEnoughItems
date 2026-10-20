@@ -6,6 +6,8 @@
 #include <string>
 #include <vector>
 
+class ItemStack;
+
 namespace bei::actions {
 
 /// Why a transfer is not possible (TransferCheck::possible == false).
@@ -62,6 +64,8 @@ public:
     /// True if the player holds an item on the cursor in the inventory / crafting table screen
     /// (other container screens are not tracked and report false).
     [[nodiscard]] bool hasCursorItem() const;
+    /// The stack hasCursorItem() reports, or nullptr. Owned by the game: use it in this frame only.
+    [[nodiscard]] ItemStack const* cursorItem() const;
     /// True if deleteCursorItem() can work now: cheat mode, creative mode, item on the cursor.
     /// Survival players cannot delete items: the server only accepts the destroy action in
     /// creative, and no command targets the cursor slot.

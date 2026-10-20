@@ -16,6 +16,10 @@ class UiRoot {
 public:
     static UiRoot& get();
 
+    /// Vanilla hover text (item tooltips of the vanilla screen) is drawn after the layers below
+    /// this zOrder and before the layers at or above it.
+    static constexpr int VANILLA_OVERLAY_Z = 1500;
+
     void install();
     void uninstall();
 
