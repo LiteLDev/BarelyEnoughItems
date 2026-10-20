@@ -1,0 +1,15 @@
+{
+    "bei.search.placeholder": "Search...",
+    "bei.tooltip.hint": "R: Recipes   U: Uses   A: Bookmark",
+    "bei.category.crafting": "Crafting",
+    "bei.category.furnace": "Smelting",
+    "bei.category.blast_furnace": "Blasting",
+    "bei.category.smoker": "Smoking",
+    "bei.category.campfire": "Campfire Cooking",
+    "bei.category.soul_campfire": "Soul Campfire Cooking",
+    "bei.category.brewing": "Brewing",
+    "bei.category.smithing": "Smithing",
+    "bei.category.stonecutter": "Stonecutting",
+    "bei.category.cartography": "Cartography",
+    "bei.category.fuel": "Fuel"
+}
