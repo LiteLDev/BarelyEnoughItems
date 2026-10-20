@@ -86,6 +86,12 @@ bool activateItem(core::ItemKey const& item, MouseButton button);
 /// and the recipe screen closed.
 [[nodiscard]] bool overlayAllowed(FrameInfo const& frame);
 
+/// Panel rectangles for this frame. The vanilla UI is laid out symmetrically around the screen
+/// center (e.g. the recipe book opens left of the inventory while FrameInfo::container only
+/// covers the inventory), so the container rect is mirrored around the center before the free
+/// space left/right of it is computed.
+[[nodiscard]] core::OverlayLayout overlayLayout(FrameInfo const& frame);
+
 /// Ask for the item tooltip of a hovered panel item. It is drawn by a dedicated layer above
 /// all overlay panels at the end of the frame, so no panel can paint over it.
 void requestItemTooltip(core::ItemKey const& item);

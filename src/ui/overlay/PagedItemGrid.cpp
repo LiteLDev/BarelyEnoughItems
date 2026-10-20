@@ -20,7 +20,6 @@ namespace bei::ui {
 namespace {
 constexpr float BUTTON_W  = 14;
 constexpr int   VK_SHIFT_ = 0x10;
-
 bool shiftDown() { return (GetAsyncKeyState(VK_SHIFT_) & 0x8000) != 0; }
 } // namespace
 
