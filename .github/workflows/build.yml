@@ -1,0 +1,45 @@
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: xmake-io/github-action-setup-xmake@v1
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/AppData/Local/.xmake
+          key: xmake-${{ hashFiles('xmake.lua', 'xmake-requires.lock') }}
+          restore-keys: |
+            xmake-
+
+      - name: Setup LLVM
+        uses: ZhongRuoyu/setup-llvm@v0
+        with:
+          llvm-version: 22
+
+      - run: git config --global core.longpaths true
+
+      - run: xmake repo -u
+
+      - run: xmake f -a x64 -m release -p windows -v --target_type=client -y
+
+      - run: xmake -v -y
+
+      - name: Unit tests
+        run: |
+          xmake build -y bei-tests
+          xmake run bei-tests
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ github.event.repository.name }}-${{ github.sha }}-client-windows-x64
+          path: |
+            bin/BEI/

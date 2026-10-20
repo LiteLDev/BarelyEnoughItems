@@ -1,0 +1,15 @@
+{
+    "bei.search.placeholder": "搜索...",
+    "bei.tooltip.hint": "R：配方   U：用途   A：书签",
+    "bei.category.crafting": "合成",
+    "bei.category.furnace": "烧炼",
+    "bei.category.blast_furnace": "高炉冶炼",
+    "bei.category.smoker": "烟熏",
+    "bei.category.campfire": "营火烹饪",
+    "bei.category.soul_campfire": "灵魂营火烹饪",
+    "bei.category.brewing": "酿造",
+    "bei.category.smithing": "锻造",
+    "bei.category.stonecutter": "切石",
+    "bei.category.cartography": "制图",
+    "bei.category.fuel": "燃料"
+}
