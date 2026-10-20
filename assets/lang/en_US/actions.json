@@ -1,0 +1,7 @@
+{
+    "bei.actions.transfer.move": "Move items",
+    "bei.actions.transfer.moveAll": "Shift-click: move as many as possible",
+    "bei.actions.transfer.missing": "Missing items",
+    "bei.actions.transfer.noGrid": "Open a crafting table (or the inventory for 2x2 recipes) to move items",
+    "bei.actions.transfer.tooLarge": "This recipe needs a crafting table"
+}
