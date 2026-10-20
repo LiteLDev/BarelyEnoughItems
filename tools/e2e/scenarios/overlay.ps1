@@ -40,7 +40,8 @@ try {
     # ">" button: page 2.
     Click $items.next[0] $items.next[1] -Relative; Start-Sleep -Milliseconds 400
     Save-Screenshot 'page2_button' $u | Out-Null
-    # Wheel down over the grid: page 3; wheel up: back to page 2.
+    # Wheel down over the grid: page 3; wheel up: back to page 2. (Needs the input unit: the
+    # scaffold router hit-tests wheel events at 0,0.)
     $p = Cell-Pos $items 1 1
     Move-Mouse $p[0] $p[1] -Relative; Start-Sleep -Milliseconds 200
     Scroll -1; Start-Sleep -Milliseconds 400
