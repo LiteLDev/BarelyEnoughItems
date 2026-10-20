@@ -180,6 +180,10 @@ function Start-Game([int]$TimeoutSeconds = 180) {
     if (Get-GameProcess) { throw "Minecraft is already running; close it first" }
     # latest.log is appended across sessions: remember where this session starts.
     $script:LogOffset = @(Get-LeviLog -All).Count
+    # A leftover launcher instance swallows --launch (single-instance hand-off) without starting
+    # the game, so close any running launcher first.
+    Get-Process -Name 'LeviLauncher' -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+    Start-Sleep -Seconds 1
     Write-Step "launching $script:VersionName via LeviLauncher"
     Start-Process -FilePath $script:Launcher -ArgumentList "--launch=`"$script:VersionName`""
     $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
@@ -260,7 +264,18 @@ function ConvertTo-Screen([double]$x, [double]$y, [switch]$Relative) {
 # ---------------------------------------------------------------------------------------
 # Input
 # ---------------------------------------------------------------------------------------
+# Safety: never send synthesized input unless Minecraft is the foreground window, so keys and
+# clicks can never land in another application (e.g. a chat window the user is typing in).
+function Assert-GameForeground {
+    $h = Get-GameWindow
+    if ([BeiE2E.Native]::GetForegroundWindow() -ne $h) {
+        Focus-Game
+        if ([BeiE2E.Native]::GetForegroundWindow() -ne $h) { throw "Minecraft is not the foreground window; refusing to send input" }
+    }
+}
+
 function Move-Mouse([double]$x, [double]$y, [switch]$Relative) {
+    Assert-GameForeground
     $p = ConvertTo-Screen $x $y -Relative:$Relative
     [BeiE2E.Native]::SetCursorPos($p.X, $p.Y) | Out-Null
     # A tiny relative move makes the game register the new position.
@@ -275,7 +290,7 @@ function Click([double]$x, [double]$y, [switch]$Relative, [switch]$Right) {
     Start-Sleep -Milliseconds 250
 }
 
-function Scroll([int]$notches) { [BeiE2E.Native]::Wheel(120 * $notches); Start-Sleep -Milliseconds 200 }
+function Scroll([int]$notches) { Assert-GameForeground; [BeiE2E.Native]::Wheel(120 * $notches); Start-Sleep -Milliseconds 200 }
 
 $script:VK = @{
     ESC = 0x1B; ENTER = 0x0D; BACK = 0x08; TAB = 0x09; SPACE = 0x20; SHIFT = 0x10; CTRL = 0x11
@@ -283,12 +298,14 @@ $script:VK = @{
 }
 
 function Press-Key([string]$key, [int]$holdMs = 60) {
+    Assert-GameForeground
     $vk = if ($script:VK.ContainsKey($key.ToUpper())) { $script:VK[$key.ToUpper()] } else { [int][char]$key.ToUpper() }
     [BeiE2E.Native]::Key([uint16]$vk, $false); Start-Sleep -Milliseconds $holdMs; [BeiE2E.Native]::Key([uint16]$vk, $true)
     Start-Sleep -Milliseconds 200
 }
 
 function Type-Text([string]$text) {
+    Assert-GameForeground
     foreach ($c in $text.ToCharArray()) { [BeiE2E.Native]::Unicode($c); Start-Sleep -Milliseconds 40 }
     Start-Sleep -Milliseconds 200
 }
