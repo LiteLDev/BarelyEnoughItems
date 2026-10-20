@@ -32,8 +32,11 @@ void BookmarkPanel::render(Painter& p, FrameInfo const& frame) {
             return i < list.size() ? &list[i] : nullptr;
         };
     }
-    auto layout = overlayLayout(frame);
-    if (!gGrid.layout(layout.bookmarkPanel, 0, app::Controller::get().config().maxColumns)) return;
+    auto layout     = overlayLayout(frame);
+    int  maxColumns = app::Controller::get().config().maxColumns;
+    if (!layout.bookmarkPanelUsable || !gGrid.layout(layout.bookmarkPageControls, layout.bookmarkGrid, maxColumns)) {
+        return;
+    }
     gGrid.logLayoutIfChanged("Bookmark panel", frame.screen);
     gGrid.setItemCount(items().size());
     gGrid.render(p, frame, {});

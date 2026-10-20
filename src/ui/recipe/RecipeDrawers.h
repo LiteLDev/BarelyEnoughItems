@@ -43,6 +43,9 @@ struct DrawContext {
     std::vector<int> const*     missingInputs = nullptr; ///< Indices into RecipeView::inputs to tint red.
     std::vector<SlotHit>*       slots  = nullptr;
     std::vector<HintHit>*       hints  = nullptr;
+    /// Horizontal room for the note line (noteRight <= noteLeft: unlimited). A note is kept inside it,
+    /// scaled down if it is wider.
+    float noteLeft = 0, noteRight = 0;
 };
 
 struct Size {

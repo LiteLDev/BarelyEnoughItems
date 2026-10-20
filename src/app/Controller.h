@@ -5,6 +5,7 @@
 #include "core/state/Config.h"
 #include "core/state/NavHistory.h"
 
+#include <chrono>
 #include <filesystem>
 #include <optional>
 #include <string>
@@ -20,7 +21,7 @@ public:
 
     /// Load config/bookmarks from `configDir`. Called from BEI::load.
     void load(std::filesystem::path configDir);
-    /// Persist config and bookmarks (cheap; called after every change).
+    /// Persist config and bookmarks (cheap; called after every change except search typing).
     void save() const;
 
     [[nodiscard]] core::Config&    config() noexcept { return mConfig; }
@@ -51,7 +52,15 @@ public:
 
     /// Current item-panel search text (owned here so the recipe screen/search box share it).
     [[nodiscard]] std::string const& searchText() const noexcept { return mConfig.lastSearch; }
+    /// Changes are persisted by tick(), debounced (see SEARCH_SAVE_DELAY).
     void                             setSearchText(std::string text);
+
+    /// Search text changes are saved this long after the last keystroke, or as soon as nothing
+    /// takes text input any more (search box unfocused, screen closed).
+    static constexpr std::chrono::milliseconds SEARCH_SAVE_DELAY{1000};
+    /// Called once per UI frame by ui::UiRoot. `typing`: a BEI layer currently takes text input.
+    /// Writes a pending debounced save when it is due.
+    void tick(bool typing);
 
 private:
     bool show(core::RecipeFocus focus);
@@ -61,6 +70,8 @@ private:
     core::Bookmarks              mBookmarks;
     core::NavHistory             mHistory;
     std::optional<core::ItemKey> mVanillaHovered;
+    mutable bool                 mSavePending = false; ///< Unsaved search text (cleared by save()).
+    std::chrono::steady_clock::time_point mLastSearchAt; ///< Time of the last search text change.
 };
 
 } // namespace bei::app

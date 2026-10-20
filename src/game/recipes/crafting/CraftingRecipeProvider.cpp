@@ -103,8 +103,8 @@ public:
         info.fallbackTitle = "Crafting";
         info.layout        = core::LayoutKind::CraftingGrid;
         info.workstations  = {
-            core::ItemKey{"minecraft:crafting_table", 0},
-            core::ItemKey{"minecraft:crafter",        0}
+            core::ItemKey{"minecraft:crafting_table", core::ItemKey::ANY_AUX},
+            core::ItemKey{"minecraft:crafter",        core::ItemKey::ANY_AUX}
         };
         info.order = 0;
         out.push_back(std::move(info));

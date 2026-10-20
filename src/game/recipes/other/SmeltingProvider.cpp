@@ -65,7 +65,7 @@ public:
             info.fallbackTitle = s.fallbackTitle;
             info.layout        = core::LayoutKind::Smelting;
             info.workstations  = {
-                core::ItemKey{s.workstation, 0}
+                core::ItemKey{s.workstation, core::ItemKey::ANY_AUX}
             };
             info.order = s.order;
             out.push_back(std::move(info));

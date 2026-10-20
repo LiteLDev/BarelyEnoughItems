@@ -38,7 +38,8 @@ struct CategoryInfo {
     std::string          titleKey;     ///< Lang key for the title, e.g. "bei.category.crafting".
     std::string          fallbackTitle; ///< Used when titleKey has no translation.
     LayoutKind           layout = LayoutKind::Generic;
-    std::vector<ItemKey> workstations; ///< Blocks that perform this category (crafting table...).
+    std::vector<ItemKey> workstations; ///< Blocks that perform this category (crafting table...); usually
+                                       ///< wildcards, since placed blocks list with other aux values.
     int                  order  = 1000; ///< Tab ordering, lower first.
 };
 

@@ -30,9 +30,10 @@ public:
     /// Item at list index `i`, or nullptr. Set once by the owner.
     std::function<core::ItemKey const*(std::size_t i)> keyAt;
 
-    /// Fit header + grid into `area`, keeping `bottomReserve` units free at the bottom
-    /// (e.g. for a search bar). Returns false (and hides the grid) if it does not fit.
-    bool layout(core::Rect const& area, float bottomReserve, int maxColumns);
+    /// Place the page header in `header` and fit the cells into `gridArea` (both from
+    /// core::computeOverlayLayout). Returns false (and hides the grid) if fewer than MIN_COLS
+    /// columns or no row fit.
+    bool layout(core::Rect const& header, core::Rect const& gridArea, int maxColumns);
     /// Update the number of items; keeps the current page when possible.
     void setItemCount(std::size_t count);
     void resetPage() noexcept { mPages.page = 0; }
@@ -89,7 +90,8 @@ bool activateItem(core::ItemKey const& item, MouseButton button);
 /// Panel rectangles for this frame. The vanilla UI is laid out symmetrically around the screen
 /// center (e.g. the recipe book opens left of the inventory while FrameInfo::container only
 /// covers the inventory), so the container rect is mirrored around the center before the free
-/// space left/right of it is computed.
+/// space left/right of it is computed. Honours Config::centerSearchBar (the centered bar is as
+/// wide as the real container).
 [[nodiscard]] core::OverlayLayout overlayLayout(FrameInfo const& frame);
 
 /// Ask for the item tooltip of a hovered panel item. It is drawn by a dedicated layer above

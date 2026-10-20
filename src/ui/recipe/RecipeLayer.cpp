@@ -189,18 +189,21 @@ void RecipeLayer::persist() {
     mFocus               = *current;
 }
 
-void RecipeLayer::measureCell() {
+void RecipeLayer::measureCell(Painter& p) {
     if (mCellValid || mTabs.empty()) return;
     auto& index = game::RecipeManager::get().index();
     auto& tab   = mTabs[static_cast<std::size_t>(mSel)];
     Size  cell{18, 18};
+    float noteW = 0;
     for (auto i : tab.recipes) {
         auto const& view = index.recipe(i);
         Size        s    = measure(tab.info.layout, view);
         cell.w           = std::max(cell.w, s.w);
         cell.h           = std::max(cell.h, s.h + noteHeight(view));
+        if (!view.note.empty()) noteW = std::max(noteW, p.textWidth(noteText(view)));
     }
     mCell      = cell;
+    mNoteW     = noteW;
     mCellValid = true;
 }
 
@@ -224,6 +227,7 @@ void RecipeLayer::layoutFrame(Painter&, FrameInfo const& frame) {
 
     float maxW   = std::max(MIN_W, S.w - 2 * (MARGIN + STRIP));
     float wanted = std::max(MIN_W, mCell.w + PLUS + 6 + 2 * PAD + 8);
+    wanted       = std::max(wanted, mNoteW + 2 * PAD + 4); // notes are one line: widen for them
     float w      = std::floor(std::min(wanted, maxW));
     float top    = MARGIN + TAB_H - 3;
     mPanel       = {std::floor((S.w - w) / 2), top, w, std::max(80.f, S.h - top - MARGIN)};
@@ -329,6 +333,8 @@ DrawContext RecipeLayer::makeContext(Painter& p, FrameInfo const& frame) {
         .mode    = mFocus.mode,
         .slots   = &mSlots,
         .hints   = &mHints,
+        .noteLeft  = mArea.x,
+        .noteRight = mArea.right(),
     };
 }
 
@@ -449,7 +455,7 @@ void RecipeLayer::render(Painter& p, FrameInfo const& frame) {
         app::Controller::get().closeRecipes();
         return;
     }
-    measureCell();
+    measureCell(p);
     layoutFrame(p, frame);
 
     drawTabs(p, frame);

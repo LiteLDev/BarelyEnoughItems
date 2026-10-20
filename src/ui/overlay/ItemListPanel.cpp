@@ -16,8 +16,6 @@
 namespace bei::ui {
 
 namespace {
-constexpr float SEARCH_H = 16;
-
 struct State {
     core::SearchEngine       search;
     std::vector<std::size_t> filtered; ///< Indices into ItemCatalog::entries().
@@ -56,9 +54,8 @@ void refreshFilter() {
     bool genChanged   = gState.filteredGen != catalog.generation();
     bool queryChanged = gState.filteredQuery != query;
     if (gState.filterValid && !genChanged && !queryChanged) return;
-    // TODO(search PR #3): use setItems(&catalog.entries(), catalog.generation()) once it is on main,
-    // so the engine keeps its per-item text cache across keystrokes.
-    gState.search.setItems(&catalog.entries());
+    // With the generation, the engine skips its per-entry change check until the catalog is rebuilt.
+    gState.search.setItems(&catalog.entries(), catalog.generation());
     gState.filtered      = gState.search.filter(query);
     gState.filteredGen   = catalog.generation();
     gState.filteredQuery = query;
@@ -84,25 +81,21 @@ void ItemListPanel::render(Painter& p, FrameInfo const& frame) {
     }
     refreshFilter();
 
-    auto const& cfg    = app::Controller::get().config();
-    auto        layout = overlayLayout(frame);
-
-    // Search bar: under the container (Config::centerSearchBar, when it fits) or at the panel bottom.
-    core::Rect centered{};
-    if (cfg.centerSearchBar && !frame.container.empty()) {
-        centered = {frame.container.x, frame.container.bottom() + 4, frame.container.w, SEARCH_H};
-        if (centered.bottom() > frame.screen.bottom() - 2) centered = {};
-    }
-    float reserve = centered.empty() ? SEARCH_H + PagedItemGrid::GAP : 0;
-
-    gState.searchShown = gState.grid.layout(layout.itemPanel, reserve, cfg.maxColumns);
+    auto layout = overlayLayout(frame);
+    gState.searchShown =
+        layout.itemPanelUsable && !layout.searchBar.empty()
+        && gState.grid.layout(layout.itemPageControls, layout.itemGrid, app::Controller::get().config().maxColumns);
     if (!gState.searchShown) {
         gState.searchBox.setFocused(false);
         return; // too narrow: draw nothing
     }
-    auto const& bounds = gState.grid.bounds();
-    gState.searchBox.rect =
-        centered.empty() ? core::Rect{bounds.x, layout.itemPanel.bottom() - SEARCH_H, bounds.w, SEARCH_H} : centered;
+    // Search bar: under the container (Config::centerSearchBar, when it fits) or at the bottom of the
+    // panel, narrowed to the grid columns there.
+    gState.searchBox.rect = layout.searchBar;
+    if (!layout.searchBarCentered) {
+        auto const& grid      = gState.grid.grid().bounds;
+        gState.searchBox.rect = {grid.x, layout.searchBar.y, grid.w, layout.searchBar.h};
+    }
     gState.grid.logLayoutIfChanged("Item panel", frame.screen, gState.searchBox.rect);
 
     auto& catalog = game::ItemCatalog::get();

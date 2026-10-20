@@ -53,7 +53,7 @@ private:
     void selectTab(int index);
     void stepPage(int delta);
     void persist();
-    void measureCell();
+    void measureCell(Painter& p);
     [[nodiscard]] int  pageCount() const;
     [[nodiscard]] actions::TransferCheck const& transferCheck(std::size_t recipe, core::RecipeView const& view, double time);
 
@@ -77,6 +77,7 @@ private:
     std::atomic<bool> mHasContent{false}; ///< Something is shown (read on the window thread).
     bool              mCellValid  = false;
     Size              mCell;
+    float             mNoteW = 0; ///< Widest note line of the selected tab (measured with mCell).
 
     // Transfer checks, refreshed a few times per second.
     std::unordered_map<std::size_t, actions::TransferCheck> mChecks;

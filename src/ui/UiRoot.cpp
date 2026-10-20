@@ -1,5 +1,6 @@
 #include "ui/UiRoot.h"
 
+#include "app/Controller.h"
 #include "game/Game.h"
 #include "mod/Log.h"
 #include "ui/gfx/Painter.h"
@@ -81,6 +82,7 @@ void UiRoot::uninstall() {
 }
 
 void UiRoot::renderFrame(ScreenView& view, MinecraftUIRenderContext& ctx) {
+    app::Controller::get().tick(wantsTextInput()); // previous frame's layers
     Painter painter(ctx);
     auto*   client       = game::currentClient();
     mFrame.screen        = painter.screen();

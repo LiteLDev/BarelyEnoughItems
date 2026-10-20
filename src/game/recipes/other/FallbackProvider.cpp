@@ -51,7 +51,8 @@ public:
             // Tags are usually named after their station block ("material_reducer"...).
             std::string itemName = tag.find(':') == std::string::npos ? "minecraft:" + tag : tag;
             if (auto const* item = registry.lookupByName(HashedString{itemName}).get()) {
-                if (auto key = keyOf(*item, 0); !key.empty()) info.workstations.push_back(std::move(key));
+                if (auto key = keyOf(*item, core::ItemKey::ANY_AUX); !key.empty())
+                    info.workstations.push_back(std::move(key));
             }
             out.push_back(std::move(info));
         }
