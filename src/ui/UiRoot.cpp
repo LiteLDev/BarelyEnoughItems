@@ -35,9 +35,10 @@ auto const             gStart = std::chrono::steady_clock::now();
 constexpr std::array CONTAINER_CONTROLS{"root_panel", "inventory_panel_bottom_half_with_label", "common_panel"};
 /// The inventory and crafting table screens (crafting.recipe_inventory_screen_content) have no
 /// root_panel; their common_panel belongs to the player inventory, which the creative layout hides
-/// (keeping a stale, narrower rect). In that layout the window is the creative item list
-/// ("recipe_book") plus the creative hotbar below it.
-constexpr std::array CREATIVE_CONTROLS{"recipe_book", "creative_hotbar_panel"};
+/// (keeping a stale, narrower rect). The creative hotbar is shown only in that layout (bound to
+/// #is_creative_layout); the window is then the creative item list ("recipe_book") plus the hotbar.
+constexpr char const* CREATIVE_HOTBAR = "creative_hotbar_panel";
+constexpr char const* CREATIVE_LIST   = "recipe_book";
 
 core::Rect controlRect(UIControl& control) {
     control._setCachedPosition();
@@ -58,14 +59,10 @@ core::Rect findContainerRect(ScreenView& view, std::string const& screenName) {
     auto& tree = view.mVisualTree;
     if (!tree) return {};
     if (screenName.starts_with("inventory_screen") || screenName.starts_with("crafting_screen")) {
-        auto inventory = tree->getControlByName("player_inventory", true);
-        if (inventory && !inventory->mIsVisibleInTree) {
-            core::Rect rect;
-            for (auto const* name : CREATIVE_CONTROLS) {
-                auto control = tree->getControlByName(name, true);
-                if (control && control->mIsVisibleInTree) rect = unite(rect, controlRect(*control));
-            }
-            if (!rect.empty()) return rect;
+        auto hotbar = tree->getControlByName(CREATIVE_HOTBAR, true);
+        auto list   = tree->getControlByName(CREATIVE_LIST, true);
+        if (hotbar && hotbar->mIsVisibleInTree && list) {
+            if (auto rect = unite(controlRect(*list), controlRect(*hotbar)); !rect.empty()) return rect;
         }
     }
     for (auto const* name : CONTAINER_CONTROLS) {
