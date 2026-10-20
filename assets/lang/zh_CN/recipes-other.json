@@ -1,0 +1,8 @@
+{
+    "bei.recipe.smithing_trim": "应用盔甲纹饰",
+    "bei.recipe.map_cloning": "复制地图",
+    "bei.recipe.map_extending": "缩小地图比例（扩展范围）",
+    "bei.recipe.map_locking": "锁定地图",
+    "bei.recipe.map_upgrading": "为地图添加位置标记",
+    "bei.fuel.burn_time": "燃烧 {seconds} 秒，可烧炼 {items} 个物品"
+}

@@ -1,0 +1,8 @@
+{
+    "bei.recipe.smithing_trim": "Applies the armor trim pattern",
+    "bei.recipe.map_cloning": "Copies the map",
+    "bei.recipe.map_extending": "Zooms the map out",
+    "bei.recipe.map_locking": "Locks the map",
+    "bei.recipe.map_upgrading": "Adds position markers to the map",
+    "bei.fuel.burn_time": "Burns {seconds}s, smelts {items} items"
+}
