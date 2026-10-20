@@ -47,7 +47,12 @@ try {
     try { Save-Screenshot 'failure' $Scenario | Out-Null } catch {}
     Get-LeviLog | Select-Object -Last 40 | ForEach-Object { Write-Host "  | $_" }
 } finally {
-    if (-not $KeepOpen) { Stop-Game }
+    if (-not $KeepOpen) {
+        Stop-Game
+        # Optional scenarios\<name>.restore.ps1 undoes what the prelaunch script changed.
+        $restore = Join-Path $PSScriptRoot "scenarios/$Scenario.restore.ps1"
+        if (Test-Path $restore) { & pwsh -NoProfile -File $restore }
+    }
     Exit-E2ELock
 }
 if ($failed) { exit 1 }

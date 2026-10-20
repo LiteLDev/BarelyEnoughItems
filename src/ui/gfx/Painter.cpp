@@ -234,53 +234,48 @@ void Painter::flush() {
         return it->second.mClientTexture.get();
     };
 
-    // Rectangles, then textured quads, of one layer. Panels/slots whose texture is missing
-    // fall back to plain rectangles so the UI stays usable with unusual resource packs.
+    // Rectangles and textured quads of one layer, in submission order (later commands draw on
+    // top). Consecutive commands of the same kind and alpha share one flushImages call.
+    // Panels/slots whose texture is missing fall back to plain rectangles so the UI stays
+    // usable with unusual resource packs.
     auto quads = [&](Layer layer) {
-        bool anyFill = false;
-        auto fill    = [&](core::Rect const& r, Color c) {
+        enum class Run { None, Fill, Image };
+        Run   run      = Run::None;
+        float runAlpha = 1;
+        auto  endRun   = [&] {
+            if (run == Run::Fill) mCtx.flushImages(white, 1.f, fillMaterial());
+            if (run == Run::Image) mCtx.flushImages(white, runAlpha, imageMaterial());
+            run = Run::None;
+        };
+        auto fill = [&](core::Rect const& r, Color c) {
+            if (run != Run::Fill) endRun(), run = Run::Fill;
             mCtx.fillRectangle(toArea(r), toMce(c), c.a);
-            anyFill = true;
         };
         for (auto& cmd : *mCmds) {
             if (cmd.layer != layer) continue;
-            if (auto* rc = std::get_if<RectCmd>(&cmd.v)) fill(rc->r, rc->c);
-            if (auto* tc = std::get_if<TextureCmd>(&cmd.v); tc && !clientTexture(tc->path)) {
+            if (auto* rc = std::get_if<RectCmd>(&cmd.v)) {
+                fill(rc->r, rc->c);
+                continue;
+            }
+            auto* tc = std::get_if<TextureCmd>(&cmd.v);
+            if (!tc) continue;
+            auto const* data = clientTexture(tc->path);
+            if (!data) {
                 if (tc->path == SLOT_TEXTURE) fill(tc->r, palette::SLOT_BG);
                 else if (tc->path == PANEL_TEXTURE) fill(tc->r, palette::PANEL_BG);
+                continue;
             }
+            if (run != Run::Image || runAlpha != tc->alpha) endRun(), run = Run::Image, runAlpha = tc->alpha;
+            mCtx.drawImage(
+                data->mClientTexture,
+                {tc->r.x, tc->r.y},
+                {tc->r.w, tc->r.h},
+                {tc->u0, tc->v0},
+                {tc->u1 - tc->u0, tc->v1 - tc->v0},
+                false
+            );
         }
-        if (anyFill) mCtx.flushImages(white, 1.f, fillMaterial());
-
-        // Group quads by alpha: flushImages applies one alpha to everything queued.
-        std::vector<float> alphas;
-        for (auto& cmd : *mCmds) {
-            if (cmd.layer != layer) continue;
-            if (auto* tc = std::get_if<TextureCmd>(&cmd.v);
-                tc && std::find(alphas.begin(), alphas.end(), tc->alpha) == alphas.end()) {
-                alphas.push_back(tc->alpha);
-            }
-        }
-        for (float alpha : alphas) {
-            bool any = false;
-            for (auto& cmd : *mCmds) {
-                if (cmd.layer != layer) continue;
-                auto* tc = std::get_if<TextureCmd>(&cmd.v);
-                if (!tc || tc->alpha != alpha) continue;
-                auto const* data = clientTexture(tc->path);
-                if (!data) continue;
-                mCtx.drawImage(
-                    data->mClientTexture,
-                    {tc->r.x, tc->r.y},
-                    {tc->r.w, tc->r.h},
-                    {tc->u0, tc->v0},
-                    {tc->u1 - tc->u0, tc->v1 - tc->v0},
-                    false
-                );
-                any = true;
-            }
-            if (any) mCtx.flushImages(white, alpha, imageMaterial());
-        }
+        endRun();
     };
 
     quads(Layer::Background);
