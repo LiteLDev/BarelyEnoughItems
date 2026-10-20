@@ -77,6 +77,16 @@ public:
 
     /// Textured quad from a resource-pack path such as "textures/ui/arrow".
     void texture(std::string const& path, core::Rect const& r, float alpha = 1);
+    /// Nine-slice a `texW`x`texH` texture with a `slice`-pixel border into `r` (corners keep
+    /// their size, edges and center stretch).
+    void nineSlice(
+        std::string const& path,
+        core::Rect const&  r,
+        float              texW,
+        float              texH,
+        float              slice,
+        Layer              layer = Layer::Background
+    );
 
     /// Replay all recorded commands in layer order.
     void flush();
