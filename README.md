@@ -34,7 +34,7 @@ Bedrock Edition has a recipe book, but it only shows crafting recipes, it cannot
 - smelting, blasting, smoking, campfire and soul campfire cooking;
 - fuel;
 - stonecutting, smithing, cartography and brewing;
-- anvil repair;
+- anvil repair (repair materials and combining two damaged items) and composting chances;
 - any data-driven or add-on recipe type, which gets a generic page.
 
 **Item list:** all creative inventory items plus registry items that are missing from it, with localized names, item tags and creative groups.
