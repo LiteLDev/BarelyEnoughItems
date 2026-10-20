@@ -34,10 +34,10 @@ auto const             gStart = std::chrono::steady_clock::now();
 /// Vanilla control names of the main container panel, most specific first.
 constexpr std::array CONTAINER_CONTROLS{"root_panel", "inventory_panel_bottom_half_with_label", "common_panel"};
 /// The inventory and crafting table screens (crafting.recipe_inventory_screen_content) have no
-/// root_panel. Their window is whichever of these is visible: the recipe book or the creative item
-/// list on the left, the player inventory on the right, the creative hotbar below the item list.
-/// (Their common_panel is the player inventory's, which is hidden in the creative layout.)
-constexpr std::array CRAFTING_CONTROLS{"recipe_book", "player_inventory", "creative_hotbar_panel"};
+/// root_panel; their common_panel belongs to the player inventory, which the creative layout hides
+/// (keeping a stale, narrower rect). In that layout the window is the creative item list
+/// ("recipe_book") plus the creative hotbar below it.
+constexpr std::array CREATIVE_CONTROLS{"recipe_book", "creative_hotbar_panel"};
 
 core::Rect controlRect(UIControl& control) {
     control._setCachedPosition();
@@ -58,12 +58,15 @@ core::Rect findContainerRect(ScreenView& view, std::string const& screenName) {
     auto& tree = view.mVisualTree;
     if (!tree) return {};
     if (screenName.starts_with("inventory_screen") || screenName.starts_with("crafting_screen")) {
-        core::Rect rect;
-        for (auto const* name : CRAFTING_CONTROLS) {
-            auto control = tree->getControlByName(name, true);
-            if (control && control->mIsVisibleInTree) rect = unite(rect, controlRect(*control));
+        auto inventory = tree->getControlByName("player_inventory", true);
+        if (inventory && !inventory->mIsVisibleInTree) {
+            core::Rect rect;
+            for (auto const* name : CREATIVE_CONTROLS) {
+                auto control = tree->getControlByName(name, true);
+                if (control && control->mIsVisibleInTree) rect = unite(rect, controlRect(*control));
+            }
+            if (!rect.empty()) return rect;
         }
-        if (!rect.empty()) return rect;
     }
     for (auto const* name : CONTAINER_CONTROLS) {
         auto control = tree->getControlByName(name, true);
