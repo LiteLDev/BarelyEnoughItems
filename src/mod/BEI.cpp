@@ -27,6 +27,7 @@ bool BEI::load() {
     getSelf().getLogger().setFlushLevel(ll::io::LogLevel::Trace);
     app::loadTranslations(getSelf().getModDir() / "lang");
     app::Controller::get().load(getSelf().getConfigDir());
+    input::InputRouter::get().registerKeys(); // before the game builds its keyboard layout
     return true;
 }
 
