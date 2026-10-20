@@ -69,7 +69,7 @@ jobs:
           $body = if ($end) { $rest[0..($end - 2)] } else { $rest }
           ($body -join "`n").Trim() | Set-Content RELEASE_NOTES.md -Encoding utf8
 
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v3
         with:
           files: bei-client-windows-x64.zip
           body_path: RELEASE_NOTES.md
