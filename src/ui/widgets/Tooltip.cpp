@@ -1,5 +1,6 @@
 #include "ui/widgets/Tooltip.h"
 
+#include "app/Controller.h"
 #include "app/I18n.h"
 #include "game/items/ItemCatalog.h"
 #include "ui/gfx/Painter.h"
@@ -173,10 +174,13 @@ void drawItemTooltip(
         {std::move(name), 0xFFFFFF}
     };
     lines.insert(lines.end(), extra.begin(), extra.end());
-    lines.push_back({item.toString(), ID_RGB});
+    auto const& cfg = app::Controller::get().config();
+    if (cfg.showItemIds) lines.push_back({item.toString(), ID_RGB}); // JEI: advanced tooltips
     lines.push_back({app::tr("bei.tooltip.hint", "R: Recipes   U: Uses   A: Bookmark"), HINT_RGB});
-    auto ns = std::string{item.nameSpace()};
-    lines.push_back({app::tr("bei.widgets.mod." + ns, prettyNamespace(ns)), MOD_RGB});
+    if (cfg.showModName) {
+        auto ns = std::string{item.nameSpace()};
+        lines.push_back({app::tr("bei.widgets.mod." + ns, prettyNamespace(ns)), MOD_RGB});
+    }
     drawTooltip(p, lines, x, y, frame);
 }
 

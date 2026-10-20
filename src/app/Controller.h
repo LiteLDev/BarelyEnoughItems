@@ -55,6 +55,12 @@ public:
     /// Changes are persisted by tick(), debounced (see SEARCH_SAVE_DELAY).
     void                             setSearchText(std::string text);
 
+    /// A search was submitted (Enter / search box unfocused): record it in Config::searchHistory
+    /// and save if the history changed.
+    void addSearchHistory(std::string const& text);
+    /// The item list page shown changed: stored in Config::lastPage (saved debounced, like search).
+    void setLastPage(int page);
+
     /// Search text changes are saved this long after the last keystroke, or as soon as nothing
     /// takes text input any more (search box unfocused, screen closed).
     static constexpr std::chrono::milliseconds SEARCH_SAVE_DELAY{1000};

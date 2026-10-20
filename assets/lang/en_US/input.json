@@ -8,5 +8,7 @@
     "bei.key.toggle_overlay": "BEI: Show/Hide Item List",
     "bei.key.toggle_overlay.description": "Show or hide the item list next to inventory screens",
     "bei.key.back": "BEI: Previous Recipe Page",
-    "bei.key.back.description": "Go back to the previously viewed recipes"
+    "bei.key.back.description": "Go back to the previously viewed recipes",
+    "bei.key.focus_search": "BEI: Focus Search (Ctrl + key)",
+    "bei.key.focus_search.description": "Hold Ctrl and press this key to type in the item list search box"
 }

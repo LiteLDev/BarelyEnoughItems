@@ -13,7 +13,8 @@ namespace bei::input {
 ///   text goes to UiRoot::dispatchChar. Otherwise BEI hotkeys (remappable via LeviLamina's
 ///   KeyRegistry, i.e. Settings > Keyboard & Mouse; detection matches raw key events against
 ///   the currently mapped keys): R recipes, U uses, A bookmark, O toggle overlay, Backspace back, act on
-///   app::Controller::hoveredItem(). Hotkeys only fire on screens with a cursor (never in
+///   app::Controller::hoveredItem(); Ctrl+F focuses the item list search box (the key is
+///   remappable, Ctrl is a fixed modifier). Hotkeys only fire on screens with a cursor (never in
 ///   gameplay) and never while a BEI or vanilla text box has focus. Backspace only acts while
 ///   the recipe screen is open.
 /// - Mouse buttons/wheel are swallowed only when the cursor is over a BEI layer; a release is

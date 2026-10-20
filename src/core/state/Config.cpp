@@ -49,6 +49,16 @@ void read(json const& j, char const* key, std::string& field) {
     if (auto it = j.find(key); it != j.end() && it->is_string()) field = it->get<std::string>();
 }
 
+/// Array of strings; non-string elements are skipped, a non-array leaves the field untouched.
+void read(json const& j, char const* key, std::vector<std::string>& field) {
+    auto it = j.find(key);
+    if (it == j.end() || !it->is_array()) return;
+    field.clear();
+    for (auto const& e : *it) {
+        if (e.is_string()) field.push_back(e.get<std::string>());
+    }
+}
+
 /// Keys read by fromJsonText (plus accepted aliases). Everything else is preserved in extraFields.
 constexpr std::string_view KNOWN_KEYS[] = {
     "version",
@@ -65,6 +75,7 @@ constexpr std::string_view KNOWN_KEYS[] = {
     "bookmarksAddToFront",
     "rememberPage",
     "lastPage",
+    "searchHistory",
     "itemPanelColumns",
     "columns",
 };
@@ -98,6 +109,8 @@ void truncateUtf8(std::string& s, std::size_t max) {
     s.resize(n);
 }
 
+bool isBlank(std::string_view s) { return s.find_first_not_of(" \t\r\n") == std::string_view::npos; }
+
 } // namespace
 
 void Config::sanitize() {
@@ -105,6 +118,26 @@ void Config::sanitize() {
     cheatGiveStackSize = std::clamp(cheatGiveStackSize, 1, MAX_STACK_SIZE);
     lastPage           = std::max(lastPage, 0);
     truncateUtf8(lastSearch, MAX_SEARCH_LENGTH);
+    // searchHistory: truncated, non-blank, distinct (first occurrence wins), capped.
+    std::vector<std::string> history;
+    for (auto& entry : searchHistory) {
+        if (history.size() >= MAX_SEARCH_HISTORY) break;
+        truncateUtf8(entry, MAX_SEARCH_LENGTH);
+        if (isBlank(entry) || std::find(history.begin(), history.end(), entry) != history.end()) continue;
+        history.push_back(std::move(entry));
+    }
+    searchHistory = std::move(history);
+}
+
+bool Config::pushSearchHistory(std::string_view text) {
+    std::string entry{text};
+    truncateUtf8(entry, MAX_SEARCH_LENGTH);
+    if (isBlank(entry)) return false;
+    if (!searchHistory.empty() && searchHistory.front() == entry) return false;
+    std::erase(searchHistory, entry);
+    searchHistory.insert(searchHistory.begin(), std::move(entry));
+    if (searchHistory.size() > MAX_SEARCH_HISTORY) searchHistory.resize(MAX_SEARCH_HISTORY);
+    return true;
 }
 
 bool Config::fromJsonText(std::string_view text) {
@@ -129,6 +162,7 @@ bool Config::fromJsonText(std::string_view text) {
     read(j, "bookmarksAddToFront", bookmarksAddToFront);
     read(j, "rememberPage", rememberPage);
     read(j, "lastPage", lastPage);
+    read(j, "searchHistory", searchHistory);
     sanitize();
 
     // Keep fields this build doesn't know (e.g. written by a newer BEI) so save() doesn't drop them.
@@ -161,6 +195,7 @@ std::string Config::toJsonText() const {
         {"bookmarksAddToFront", c.bookmarksAddToFront},
         {"rememberPage", c.rememberPage},
         {"lastPage", c.lastPage},
+        {"searchHistory", c.searchHistory},
     };
     if (!extraFields.empty()) {
         auto extra = json::parse(extraFields, nullptr, false);

@@ -64,8 +64,23 @@ std::optional<core::ItemKey> Controller::hoveredItem() const {
 }
 
 void Controller::toggleBookmark(core::ItemKey const& item) {
-    mBookmarks.toggle(item);
+    if (!mConfig.bookmarksAddToFront && !mBookmarks.contains(item)) {
+        mBookmarks.insert(mBookmarks.size(), item); // Config: new bookmarks go to the back
+    } else {
+        mBookmarks.toggle(item);
+    }
     save();
+}
+
+void Controller::addSearchHistory(std::string const& text) {
+    if (mConfig.pushSearchHistory(text)) save();
+}
+
+void Controller::setLastPage(int page) {
+    if (page < 0 || page == mConfig.lastPage) return;
+    mConfig.lastPage = page;
+    mSavePending     = true;
+    mLastSearchAt    = std::chrono::steady_clock::now();
 }
 
 void Controller::toggleOverlay() {

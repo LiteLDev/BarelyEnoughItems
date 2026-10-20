@@ -60,6 +60,41 @@ void setCrafting(CraftingScreenController* ctrl) {
 #endif
 }
 
+// --- Tracking the live container screen (cursor stack) ---------------------------------------
+
+/// The most recent live ContainerScreenController of any kind (inventory, crafting table, chest,
+/// furnace, ...), for the stack held on the cursor. Set by its tick, cleared when the screen is
+/// left or the controller destroyed, so it never dangles.
+ContainerScreenController* gContainer = nullptr;
+
+void setContainer(ContainerScreenController* ctrl) {
+    if (gContainer == ctrl) return;
+    gContainer = ctrl;
+    log().debug("Actions: container screen {}", ctrl ? "active" : "gone");
+}
+
+LL_TYPE_INSTANCE_HOOK(
+    ContainerTickHook,
+    ll::memory::HookPriority::Normal,
+    ContainerScreenController,
+    &ContainerScreenController::$tick,
+    ::ui::DirtyFlag
+) {
+    setContainer(this);
+    return origin();
+}
+
+LL_TYPE_INSTANCE_HOOK(
+    ContainerLeaveHook,
+    ll::memory::HookPriority::Normal,
+    ContainerScreenController,
+    &ContainerScreenController::$onLeave,
+    void
+) {
+    if (gContainer == this) setContainer(nullptr);
+    origin();
+}
+
 LL_TYPE_INSTANCE_HOOK(
     CraftingTickHook,
     ll::memory::HookPriority::Normal,
@@ -68,6 +103,7 @@ LL_TYPE_INSTANCE_HOOK(
     ::ui::DirtyFlag
 ) {
     setCrafting(this);
+    setContainer(this); // in case the override does not call the base tick
     return origin();
 }
 
@@ -90,6 +126,7 @@ LL_TYPE_INSTANCE_HOOK(
     void
 ) {
     if (gCrafting && static_cast<ContainerScreenController*>(gCrafting) == this) setCrafting(nullptr);
+    if (gContainer == this) setContainer(nullptr);
     origin();
 }
 
@@ -108,6 +145,18 @@ std::string const& collectionName(ContainerEnumName name) {
 ContainerManagerController* manager() {
     if (!gCrafting || !game::currentPlayer()) return nullptr;
     return gCrafting->mContainerManagerController.get();
+}
+
+/// The screen whose cursor stack BEI shows and deletes: the live container screen, else the
+/// crafting screen.
+ContainerScreenController* cursorScreen() {
+    if (!game::currentPlayer()) return nullptr;
+    return gContainer ? gContainer : static_cast<ContainerScreenController*>(gCrafting);
+}
+
+ContainerManagerController* cursorManager() {
+    auto* screen = cursorScreen();
+    return screen ? screen->mContainerManagerController.get() : nullptr;
 }
 
 struct Slot {
@@ -193,6 +242,25 @@ ItemStack const* cursorStack(ContainerManagerController& mgr) {
     return stack.isNull() || stack.mCount == 0 ? nullptr : &stack;
 }
 
+/// The creative item list collections (tabs). Placing the cursor stack on one is vanilla's
+/// creative "delete".
+constexpr ContainerEnumName CREATIVE_LISTS[]{
+    ContainerEnumName::RecipeConstructionContainer,
+    ContainerEnumName::RecipeEquipmentContainer,
+    ContainerEnumName::RecipeItemsContainer,
+    ContainerEnumName::RecipeNatureContainer,
+    ContainerEnumName::RecipeSearchContainer,
+};
+
+/// True if `mgr` has a creative item list (only the creative inventory screen does). In other
+/// screens (chest, furnace, ...) the server does not accept destroying the cursor stack.
+bool hasCreativeList(ContainerManagerController& mgr) {
+    return std::any_of(std::begin(CREATIVE_LISTS), std::end(CREATIVE_LISTS), [&](ContainerEnumName e) {
+        auto const& name = collectionName(e);
+        return !name.empty() && mgr.hasContainerController(name);
+    });
+}
+
 // --- Commands --------------------------------------------------------------------------------
 
 /// Same layout as CommandRequestPacketPayload, whose default constructor is not exported.
@@ -244,6 +312,8 @@ Actions& Actions::get() {
 }
 
 void Actions::install() {
+    ContainerTickHook::hook();
+    ContainerLeaveHook::hook();
     CraftingTickHook::hook();
     CraftingTerminateHook::hook();
     ContainerScreenDtorHook::hook();
@@ -273,7 +343,10 @@ void Actions::uninstall() {
     ContainerScreenDtorHook::unhook();
     CraftingTerminateHook::unhook();
     CraftingTickHook::unhook();
-    gCrafting = nullptr;
+    ContainerLeaveHook::unhook();
+    ContainerTickHook::unhook();
+    gCrafting  = nullptr;
+    gContainer = nullptr;
 }
 
 int Actions::currentCraftingGridSize() const {
@@ -416,7 +489,7 @@ bool Actions::give(core::ItemKey const& item, int count) {
 }
 
 ItemStack const* Actions::cursorItem() const {
-    auto* mgr = manager();
+    auto* mgr = cursorManager();
     return mgr ? cursorStack(*mgr) : nullptr;
 }
 
@@ -424,23 +497,21 @@ bool Actions::hasCursorItem() const { return cursorItem() != nullptr; }
 
 bool Actions::canDeleteCursorItem() const {
     auto* player = game::currentPlayer();
-    return player && player->isCreative() && canCheat() && hasCursorItem();
+    auto* mgr    = cursorManager();
+    return player && player->isCreative() && canCheat() && mgr && cursorStack(*mgr)
+        && hasCreativeList(*mgr);
 }
 
 bool Actions::deleteCursorItem() {
     if (!canDeleteCursorItem()) return false;
-    auto* mgr = manager();
+    auto* screen = cursorScreen();
+    auto* mgr    = cursorManager();
     // In creative, placing the cursor stack onto the creative item list destroys it (vanilla behavior,
     // sent as a server-validated destroy request).
-    for (auto e :
-         {ContainerEnumName::RecipeConstructionContainer,
-          ContainerEnumName::RecipeEquipmentContainer,
-          ContainerEnumName::RecipeItemsContainer,
-          ContainerEnumName::RecipeNatureContainer,
-          ContainerEnumName::RecipeSearchContainer}) {
+    for (auto e : CREATIVE_LISTS) {
         auto const& name = collectionName(e);
         if (name.empty() || !mgr->hasContainerController(name)) continue;
-        gCrafting->_handlePlaceAll(name, 0);
+        screen->_handlePlaceAll(name, 0);
         if (!cursorStack(*mgr)) {
             log().debug("Actions: deleted cursor item via {}", name);
             return true;

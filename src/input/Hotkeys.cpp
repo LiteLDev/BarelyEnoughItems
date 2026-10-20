@@ -18,6 +18,7 @@
 #include "app/I18n.h"
 #include "mod/Log.h"
 #include "ui/UiRoot.h"
+#include "ui/overlay/ItemListPanel.h"
 #include "ui/recipe/RecipeScreen.h"
 
 #include "ll/api/input/KeyRegistry.h"
@@ -37,28 +38,37 @@
 #include <string_view>
 #include <vector>
 
+// Avoid <windows.h> here (macro clashes with game headers); only this one call is needed.
+extern "C" __declspec(dllimport) short __stdcall GetAsyncKeyState(int vKey);
+#pragma comment(lib, "user32")
+
 namespace bei::input::detail {
 
 namespace {
 
-enum class Action { ShowRecipes, ShowUses, ToggleBookmark, ToggleOverlay, Back };
+enum class Action { ShowRecipes, ShowUses, ToggleBookmark, ToggleOverlay, Back, FocusSearch };
 
 struct HotkeyDef {
     std::string_view name;       ///< KeyRegistry name; the game calls it "key.BEI.<name>".
     int              defaultKey; ///< Windows virtual-key code.
     Action           action;
+    /// Fires only while Ctrl is held. The game's key bindings are single keys, so the modifier
+    /// is fixed and only the key is remappable (the name in the controls menu says "Ctrl+").
+    bool ctrl = false;
 };
 
 constexpr int VK_BACKSPACE = 0x08;
+constexpr int VK_CONTROL_  = 0x11;
 
-constexpr std::array<HotkeyDef, 5> HOTKEYS{
+constexpr std::array<HotkeyDef, 6> HOTKEYS{
     {
      {"show_recipes", 'R', Action::ShowRecipes},
      {"show_uses", 'U', Action::ShowUses},
      {"toggle_bookmark", 'A', Action::ToggleBookmark},
      {"toggle_overlay", 'O', Action::ToggleOverlay},
      {"back", VK_BACKSPACE, Action::Back},
-     }
+     {"focus_search", 'F', Action::FocusSearch, true}, // JEI: Ctrl+F
+    }
 };
 
 /// Keymapping action ids are "key.<modName>.<name>"; BEI's mod name is "BEI".
@@ -99,6 +109,10 @@ void run(HotkeyDef const& def) {
         if (!ui::RecipeScreen::get().isOpen()) return;
         log().info("Hotkey {}", def.name);
         controller.back();
+        return;
+    case Action::FocusSearch:
+        if (ui::RecipeScreen::get().isOpen()) return;
+        log().info("Hotkey {}: search box {}", def.name, ui::ItemListPanel::get().focusSearch() ? "focused" : "not shown");
         return;
     default:
         break;
@@ -248,7 +262,9 @@ void onHotkeyKeyDown(int vk) {
     auto& snap = snapshot();
     // Cheap pre-checks; run() re-checks on the client thread.
     if (!snap.cursorScreen.load() || snap.vanillaTextFocus.load() || snap.beiTextFocus.load()) return;
+    bool const ctrl = (GetAsyncKeyState(VK_CONTROL_) & 0x8000) != 0;
     for (std::size_t i = 0; i < HOTKEYS.size(); ++i) {
+        if (HOTKEYS[i].ctrl && !ctrl) continue;
         for (auto const& key : gKeys[i]) {
             if (key.load() != vk) continue;
             post([i] { run(HOTKEYS[i]); });

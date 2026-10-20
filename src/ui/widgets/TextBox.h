@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core/state/HistoryCursor.h"
 #include "core/state/Layout.h"
 
 #include <cstddef>
@@ -21,7 +22,7 @@ class Painter;
 ///
 /// Editing: Left/Right (Ctrl: by word, Shift: extend selection), Home/End, Backspace/Delete
 /// (Ctrl: whole word), Ctrl+A/C/X/V (Windows clipboard), double click selects all, right click
-/// clears, Enter/Esc unfocus. Text wider than the box scrolls horizontally to keep the caret
+/// clears, Enter/Esc unfocus, Up/Down browse `history`. Text wider than the box scrolls horizontally to keep the caret
 /// visible. Focus claims the game keyboard (see TextInput); a box that is not drawn for a few
 /// frames loses focus automatically. Call everything on the client thread.
 class TextBox {
@@ -31,6 +32,12 @@ public:
     std::function<void(std::string const&)> onChange;
     std::size_t                             maxLength = 256; ///< In code points.
     std::uint32_t                           textColor = 0xE0E0E0;
+    /// Fired when text is submitted: Enter, or losing focus (any way) with non-blank text.
+    std::function<void(std::string const&)> onSubmit;
+    /// Optional submitted-text history, newest first (e.g. Config::searchHistory). Up/Down while
+    /// focused replace the text with older/newer entries (Down past the newest restores what was
+    /// typed); any edit or focus change ends the navigation.
+    std::function<std::vector<std::string> const&()> history;
 
     TextBox() = default;
     ~TextBox();
@@ -72,6 +79,8 @@ private:
     void                      eraseRange(std::size_t from, std::size_t to);
     void                      deleteSelection();
     void                      changed();
+    void                      submit();
+    void                      browseHistory(bool older);
     void                      restartBlink() noexcept { mBlinkOrigin = mLastTime; }
     [[nodiscard]] std::size_t offsetAt(float x) const;
     [[nodiscard]] bool        ctrlDown() const;
@@ -90,6 +99,7 @@ private:
     double mBackKeyAt = -1, mBackCharAt = -1;
     bool   mBackKeyEcho = false, mBackCharEcho = false;
     double mLastClick = -1;
+    core::HistoryCursor mHistoryCursor;
 
     // Render-time cache (render() is const; the box is single-threaded).
     mutable double             mLastTime       = 0;

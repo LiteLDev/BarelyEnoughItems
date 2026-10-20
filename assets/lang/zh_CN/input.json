@@ -8,5 +8,7 @@
     "bei.key.toggle_overlay": "BEI：显示/隐藏物品列表",
     "bei.key.toggle_overlay.description": "显示或隐藏物品栏界面旁的物品列表",
     "bei.key.back": "BEI：返回上一配方页",
-    "bei.key.back.description": "返回之前查看的配方"
+    "bei.key.back.description": "返回之前查看的配方",
+    "bei.key.focus_search": "BEI：聚焦搜索框（Ctrl + 此键）",
+    "bei.key.focus_search.description": "按住 Ctrl 再按此键，即可在物品列表搜索框中输入"
 }

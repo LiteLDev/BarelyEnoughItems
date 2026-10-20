@@ -10,6 +10,7 @@
 #include "ui/gfx/Painter.h"
 #include "ui/overlay/PagedItemGrid.h"
 #include "ui/widgets/TextBox.h"
+#include "ui/widgets/TextInput.h"
 
 #include <vector>
 
@@ -25,7 +26,9 @@ struct State {
 
     PagedItemGrid grid;
     TextBox       searchBox;
-    bool          searchShown = false;
+    core::Rect    configButton; ///< Settings button right of the search bar (drawn by SettingsLayer).
+    bool          searchShown  = false;
+    bool          pageRestored = false; ///< Config::lastPage was applied (once per game start).
     double        lastRender  = -1;
     std::string   emptyText;
     bool          initialized = false;
@@ -43,7 +46,14 @@ void initOnce() {
     };
     gState.searchBox.setText(app::Controller::get().searchText());
     gState.searchBox.onChange = [](std::string const& t) { app::Controller::get().setSearchText(t); };
+    gState.searchBox.onSubmit = [](std::string const& t) { app::Controller::get().addSearchHistory(t); };
+    gState.searchBox.history  = []() -> std::vector<std::string> const& {
+        return app::Controller::get().config().searchHistory;
+    };
 }
+
+constexpr float CONFIG_BUTTON_GAP    = 2;  ///< Between the search bar and the settings button.
+constexpr float MIN_SEARCH_BAR_WIDTH = 24; ///< Narrower bars get no settings button (3 columns still fit).
 
 /// Recompute the filtered list only when the catalog or the query changed.
 void refreshFilter() {
@@ -87,6 +97,7 @@ void ItemListPanel::render(Painter& p, FrameInfo const& frame) {
         && gState.grid.layout(layout.itemPageControls, layout.itemGrid, app::Controller::get().config().maxColumns);
     if (!gState.searchShown) {
         gState.searchBox.setFocused(false);
+        gState.configButton = {};
         return; // too narrow: draw nothing
     }
     // Search bar: under the container (Config::centerSearchBar, when it fits) or at the bottom of the
@@ -96,10 +107,24 @@ void ItemListPanel::render(Painter& p, FrameInfo const& frame) {
         auto const& grid      = gState.grid.grid().bounds;
         gState.searchBox.rect = {grid.x, layout.searchBar.y, grid.w, layout.searchBar.h};
     }
+    // Settings button (JEI's wrench) at the right end of the bar, a square as tall as the bar.
+    auto& bar           = gState.searchBox.rect;
+    float buttonSize    = bar.h;
+    gState.configButton = {};
+    if (bar.w - buttonSize - CONFIG_BUTTON_GAP >= MIN_SEARCH_BAR_WIDTH) {
+        gState.configButton  = {bar.right() - buttonSize, bar.y, buttonSize, buttonSize};
+        bar.w               -= buttonSize + CONFIG_BUTTON_GAP;
+    }
     gState.grid.logLayoutIfChanged("Item panel", frame.screen, gState.searchBox.rect);
 
-    auto& catalog = game::ItemCatalog::get();
+    auto& catalog    = game::ItemCatalog::get();
+    auto& controller = app::Controller::get();
     gState.grid.setItemCount(gState.filtered.size());
+    if (!gState.pageRestored && !catalog.entries().empty()) {
+        gState.pageRestored = true;
+        if (controller.config().rememberPage) gState.grid.jumpTo(controller.config().lastPage);
+    }
+    if (gState.pageRestored) controller.setLastPage(gState.grid.pages().page);
     gState.grid.render(p, frame, catalog.entries().empty() ? std::string{} : gState.emptyText);
     gState.searchBox.render(p, frame.time);
 
@@ -125,6 +150,18 @@ bool ItemListPanel::onKey(int vk, bool down) { return gState.searchBox.onKey(vk,
 bool ItemListPanel::onChar(std::string const& utf8) { return gState.searchBox.onChar(utf8); }
 
 bool ItemListPanel::wantsTextInput() const { return gState.searchShown && gState.searchBox.focused(); }
+
+bool ItemListPanel::focusSearch() {
+    // searchShown is from the last frame the panel rendered: also require that frame to be recent
+    // (the overlay may have been hidden or the screen changed since).
+    constexpr double RECENT = 0.25; // seconds
+    if (!gState.searchShown || TextInput::now() - gState.searchBox.lastRenderTime() > RECENT) return false;
+    gState.searchBox.setFocused(true);
+    gState.searchBox.selectAll(); // typing replaces the old query
+    return true;
+}
+
+core::Rect ItemListPanel::configButtonRect() const { return gState.searchShown ? gState.configButton : core::Rect{}; }
 
 BEI_REGISTER_UI_LAYER(ItemListPanel::get());
 

@@ -38,6 +38,7 @@ public:
     void setItemCount(std::size_t count);
     void resetPage() noexcept { mPages.page = 0; }
     void step(int delta) noexcept { mPages.step(delta); }
+    void jumpTo(int page) noexcept { mPages.jumpTo(page); }
 
     /// Draw header and visible cells. Does not draw the tooltip (see hoveredItem()).
     void render(Painter& painter, FrameInfo const& frame, std::string const& emptyText);
@@ -97,6 +98,10 @@ bool activateItem(core::ItemKey const& item, MouseButton button);
 /// Ask for the item tooltip of a hovered panel item. It is drawn by a dedicated layer above
 /// all overlay panels at the end of the frame, so no panel can paint over it.
 void requestItemTooltip(core::ItemKey const& item);
+
+/// Area of an open overlay popup (the settings popup), or empty. Panel item tooltips are not drawn
+/// while the cursor is over it. Set every frame by the popup's layer.
+void setOverlayPopup(core::Rect const& rect);
 
 /// True when `frame` is the first rendered frame after the overlay was hidden (screen opened).
 /// `lastTime` is per caller state.
