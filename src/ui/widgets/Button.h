@@ -3,6 +3,8 @@
 #include "core/model/ItemKey.h"
 #include "core/state/Layout.h"
 
+#include <cstdint>
+#include <optional>
 #include <string>
 
 namespace bei::ui {
@@ -11,7 +13,7 @@ class Painter;
 struct Color;
 
 /// Simple vector icons drawn with rectangles (the UI font has no reliable arrow glyphs).
-enum class Glyph { None, ArrowLeft, ArrowRight, ArrowUp, ArrowDown, Plus, Minus, Cross, Check };
+enum class Glyph { None, ArrowLeft, ArrowRight, ArrowUp, ArrowDown, Plus, Minus, Cross, Check, Wrench };
 
 /// Draw `glyph` centred in `area` (pixel-art style, about 7x7 GUI units).
 void drawGlyph(Painter& painter, Glyph glyph, core::Rect const& area, Color color);
@@ -27,6 +29,9 @@ struct Button {
     bool          enabled = true;
     Glyph         glyph   = Glyph::None; ///< Drawn when there is no item icon.
     bool          toggled = false;       ///< Toggle buttons: draw pressed in.
+    /// Tint (RGB) replacing the grey face, e.g. red for the settings button in cheat mode.
+    /// Hover lightens it; the bevel is derived from it. Ignored while disabled.
+    std::optional<std::uint32_t> tint;
 
     void               render(Painter& painter, float mouseX, float mouseY) const;
     [[nodiscard]] bool hit(float x, float y) const noexcept { return enabled && rect.contains(x, y); }

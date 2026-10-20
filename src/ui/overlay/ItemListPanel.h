@@ -17,7 +17,10 @@ namespace bei::ui {
 ///   right click: showUses. Wheel scrolls pages.
 /// - The search text lives in app::Controller (searchText/setSearchText).
 /// - The page is kept when the item catalog changes and reset to the first page when the
-///   search query changes.
+///   search query changes. The page shown is stored in Config::lastPage; with
+///   Config::rememberPage it is restored the first time the panel is shown after a game start.
+/// - Submitted searches (Enter / unfocus) go to Config::searchHistory; Up/Down browse it.
+/// - A settings button sits right of the search bar (see configButtonRect, SettingsLayer).
 class ItemListPanel final : public IUiLayer {
 public:
     static ItemListPanel& get();
@@ -41,6 +44,13 @@ public:
     [[nodiscard]] bool wantsTextInput() const override;
     [[nodiscard]] bool contains(float x, float y) const override;
     [[nodiscard]] std::optional<core::ItemKey> itemAt(float x, float y) const override;
+
+    /// Give the search box keyboard focus (Ctrl+F hotkey) and select its text. Returns false if
+    /// the panel is not shown. Client thread.
+    bool focusSearch();
+    /// Where the settings (wrench) button goes this frame: right of the search bar, which is
+    /// narrowed for it. Empty while the panel is not shown. Drawn by the settings layer.
+    [[nodiscard]] core::Rect configButtonRect() const;
 };
 
 } // namespace bei::ui

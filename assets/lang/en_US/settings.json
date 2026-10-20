@@ -1,0 +1,17 @@
+{
+    "bei.settings.title": "BEI Settings",
+    "bei.settings.open_hint": "Click: settings",
+    "bei.settings.cheat_hint": "Ctrl+Click: toggle cheat mode",
+    "bei.settings.cheat_on": "Cheat mode is ON (click items to get them)",
+    "bei.settings.cheat_unavailable": "Cheat mode needs cheats enabled and operator permission",
+    "bei.settings.cheat_mode": "Cheat mode",
+    "bei.settings.bookmarks": "Bookmark panel",
+    "bei.settings.bookmarks_front": "Add new bookmarks to the front",
+    "bei.settings.center_search": "Search bar under the container",
+    "bei.settings.item_ids": "Show item ids in tooltips",
+    "bei.settings.mod_name": "Show mod name in tooltips",
+    "bei.settings.remember_page": "Remember the item list page",
+    "bei.settings.all_containers": "Show on all container screens",
+    "bei.settings.columns": "Max columns: {}",
+    "bei.settings.columns_auto": "Auto ({})"
+}

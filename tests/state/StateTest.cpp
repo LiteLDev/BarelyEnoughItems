@@ -1,6 +1,7 @@
 #include "core/state/AtomicWrite.h"
 #include "core/state/Bookmarks.h"
 #include "core/state/Config.h"
+#include "core/state/HistoryCursor.h"
 #include "core/state/Layout.h"
 #include "core/state/NavHistory.h"
 
@@ -864,4 +865,97 @@ TEST(Config, CorruptAndMigration) {
     Config bom;
     EXPECT_TRUE(bom.load(file));
     EXPECT_TRUE(bom.cheatMode);
+}
+
+// ---------------------------------------------------------------- Search history
+
+TEST(Config, SearchHistoryPushDedupAndCap) {
+    Config c;
+    EXPECT_FALSE(c.pushSearchHistory(""));
+    EXPECT_FALSE(c.pushSearchHistory("  \t"));
+    EXPECT_TRUE(c.pushSearchHistory("oak"));
+    EXPECT_TRUE(c.pushSearchHistory("stone"));
+    EXPECT_FALSE(c.pushSearchHistory("stone")); // already the newest
+    EXPECT_TRUE(c.pushSearchHistory("oak"));    // moves to the front
+    EXPECT_EQ(c.searchHistory, (std::vector<std::string>{"oak", "stone"}));
+    for (int i = 0; i < 30; ++i) c.pushSearchHistory("q" + std::to_string(i));
+    ASSERT_EQ(c.searchHistory.size(), Config::MAX_SEARCH_HISTORY);
+    EXPECT_EQ(c.searchHistory.front(), "q29");
+    EXPECT_EQ(c.searchHistory.back(), "q10");
+    std::string longText(Config::MAX_SEARCH_LENGTH + 10, 'x');
+    EXPECT_TRUE(c.pushSearchHistory(longText));
+    EXPECT_EQ(c.searchHistory.front().size(), Config::MAX_SEARCH_LENGTH);
+}
+
+TEST(Config, SearchHistoryRoundTripAndSanitize) {
+    Config c;
+    c.pushSearchHistory("a");
+    c.pushSearchHistory("橡木");
+    Config l;
+    ASSERT_TRUE(l.fromJsonText(c.toJsonText()));
+    EXPECT_EQ(l.searchHistory, c.searchHistory);
+
+    Config bad;
+    ASSERT_TRUE(bad.fromJsonText(R"({"searchHistory":["x", 3, "", "x", "  ", "y"]})"));
+    EXPECT_EQ(bad.searchHistory, (std::vector<std::string>{"x", "y"}));
+    Config wrongType;
+    ASSERT_TRUE(wrongType.fromJsonText(R"({"searchHistory":"x"})"));
+    EXPECT_TRUE(wrongType.searchHistory.empty());
+    EXPECT_EQ(wrongType.extraFields, ""); // a known key, not preserved as unknown
+
+    std::string many = R"({"searchHistory":[)";
+    for (int i = 0; i < 40; ++i) many += (i ? ",\"s" : "\"s") + std::to_string(i) + "\"";
+    many += "]}";
+    Config capped;
+    ASSERT_TRUE(capped.fromJsonText(many));
+    ASSERT_EQ(capped.searchHistory.size(), Config::MAX_SEARCH_HISTORY);
+    EXPECT_EQ(capped.searchHistory.front(), "s0");
+}
+
+TEST(HistoryCursor, UpDownWithDraft) {
+    std::vector<std::string> h{"stone", "oak", "dirt"};
+    HistoryCursor            cur;
+    EXPECT_EQ(cur.newer(h, "dra"), std::nullopt); // not navigating
+    EXPECT_EQ(cur.older(h, "dra"), "stone");
+    EXPECT_EQ(cur.older(h, "stone"), "oak");
+    EXPECT_EQ(cur.older(h, "oak"), "dirt");
+    EXPECT_EQ(cur.older(h, "dirt"), std::nullopt); // the oldest one stays
+    EXPECT_EQ(cur.index(), 2);
+    EXPECT_EQ(cur.newer(h, "dirt"), "oak");
+    EXPECT_EQ(cur.newer(h, "oak"), "stone");
+    EXPECT_EQ(cur.newer(h, "stone"), "dra"); // back to the draft
+    EXPECT_EQ(cur.index(), -1);
+    EXPECT_EQ(cur.newer(h, "dra"), std::nullopt);
+}
+
+TEST(HistoryCursor, EveryStepChangesTheText) {
+    HistoryCursor cur;
+    EXPECT_EQ(cur.older({}, "x"), std::nullopt);
+    // Just submitted "stone": Up shows the search before it, Down goes straight back.
+    std::vector<std::string> h{"stone", "oak"};
+    EXPECT_EQ(cur.older(h, "stone"), "oak");
+    EXPECT_EQ(cur.newer(h, "oak"), "stone");
+    EXPECT_EQ(cur.index(), -1);
+    // A draft that equals an older entry is not shown twice on the way up either.
+    std::vector<std::string> h2{"a", "b", "c"};
+    EXPECT_EQ(cur.older(h2, "b"), "a");
+    EXPECT_EQ(cur.older(h2, "a"), "c"); // "b" is the draft
+    EXPECT_EQ(cur.newer(h2, "c"), "a");
+    EXPECT_EQ(cur.newer(h2, "a"), "b");
+    cur.reset();
+    std::vector<std::string> one{"only"};
+    EXPECT_EQ(cur.older(one, "only"), std::nullopt);
+    EXPECT_EQ(cur.index(), -1);
+}
+
+TEST(HistoryCursor, ShrinkingList) {
+    HistoryCursor            cur;
+    std::vector<std::string> big{"a", "b", "c"};
+    EXPECT_EQ(cur.older(big, ""), "a");
+    EXPECT_EQ(cur.older(big, "a"), "b");
+    EXPECT_EQ(cur.older(big, "b"), "c");
+    std::vector<std::string> small{"z"};
+    EXPECT_EQ(cur.older(small, "c"), std::nullopt); // no index past the shorter list
+    EXPECT_EQ(cur.newer(small, "c"), "z");           // clamped into the shorter list
+    EXPECT_EQ(cur.newer(small, "z"), "");            // the draft
 }

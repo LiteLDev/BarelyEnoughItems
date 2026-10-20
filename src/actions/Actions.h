@@ -75,14 +75,16 @@ public:
     /// Side length of the open crafting grid: 3 (crafting table), 2 (inventory) or 0 (none).
     [[nodiscard]] int currentCraftingGridSize() const;
 
-    /// True if the player holds an item on the cursor in the inventory / crafting table screen
-    /// (other container screens are not tracked and report false).
+    /// True if the player holds an item on the cursor in the open container screen (any vanilla
+    /// ContainerScreenController: inventory, crafting table, chest, furnace, ...).
     [[nodiscard]] bool hasCursorItem() const;
     /// The stack hasCursorItem() reports, or nullptr. Owned by the game: use it in this frame only.
     [[nodiscard]] ItemStack const* cursorItem() const;
-    /// True if deleteCursorItem() can work now: cheat mode, creative mode, item on the cursor.
-    /// Survival players cannot delete items: the server only accepts the destroy action in
-    /// creative, and no command targets the cursor slot.
+    /// True if deleteCursorItem() can work now: cheat mode, creative mode, item on the cursor, in
+    /// the creative inventory screen. Survival players cannot delete items: the server only
+    /// accepts the destroy action in creative, and no command targets the cursor slot. Other
+    /// container screens (chest, furnace, ...) have no creative item list to drop the stack on,
+    /// and the server turns a direct destroy request there into a drop or rejects it.
     [[nodiscard]] bool canDeleteCursorItem() const;
     /// Delete the cursor stack (overlay: click on the item panel while holding an item in cheat
     /// mode). Uses the vanilla creative "drop into the item list" action. Returns false if

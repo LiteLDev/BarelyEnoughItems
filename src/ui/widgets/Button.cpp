@@ -2,6 +2,7 @@
 
 #include "ui/gfx/Painter.h"
 
+#include <algorithm>
 #include <cmath>
 
 namespace bei::ui {
@@ -74,13 +75,45 @@ void drawGlyph(Painter& p, Glyph glyph, core::Rect const& area, Color c) {
         for (int i = 0; i < 3; ++i) p.fillRect({gx + i, gy + 3 + i, 1, 2}, c);
         for (int i = 0; i < 4; ++i) p.fillRect({gx + 3 + i, gy + 4 - i, 1, 2}, c);
         break;
+    case Glyph::Wrench: {
+        // Open-jaw head top right, handle down to the bottom left (rows of the 7x7 box).
+        static constexpr char const* ROWS[7]{
+            "...X..X",
+            "...X..X",
+            "...XXXX",
+            "...XXX.",
+            "..XX...",
+            ".XX....",
+            "XX.....",
+        };
+        for (int row = 0; row < 7; ++row) {
+            for (int col = 0; col < 7; ++col) {
+                if (ROWS[row][col] == 'X') p.fillRect({gx + col, gy + row, 1, 1}, c);
+            }
+        }
+        break;
+    }
     }
 }
+
+namespace {
+Color scaled(std::uint32_t rgb, float f) {
+    Color c = Color::rgb(rgb);
+    auto  s = [f](float v) { return std::clamp(v * f, 0.f, 1.f); };
+    return {s(c.r), s(c.g), s(c.b), 1.f};
+}
+} // namespace
 
 void Button::render(Painter& p, float mx, float my) const {
     if (rect.empty()) return;
     bool        hover = enabled && rect.contains(mx, my);
-    Look const& look  = !enabled ? DISABLED : toggled ? PRESSED : hover ? HOVER : NORMAL;
+    Look        look  = !enabled ? DISABLED : toggled ? PRESSED : hover ? HOVER : NORMAL;
+    if (tint && enabled) {
+        float f   = hover ? 1.25f : 1.f;
+        look.face = scaled(*tint, f);
+        look.light = scaled(*tint, f * (toggled ? 0.6f : 1.5f));
+        look.dark  = scaled(*tint, f * (toggled ? 1.4f : 0.6f));
+    }
     auto const& r     = rect;
 
     p.fillRect(r, look.outline);

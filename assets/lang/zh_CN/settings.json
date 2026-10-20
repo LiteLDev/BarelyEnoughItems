@@ -1,0 +1,17 @@
+{
+    "bei.settings.title": "BEI 设置",
+    "bei.settings.open_hint": "点击：打开设置",
+    "bei.settings.cheat_hint": "Ctrl+点击：切换作弊模式",
+    "bei.settings.cheat_on": "作弊模式已开启（点击物品即可获得）",
+    "bei.settings.cheat_unavailable": "作弊模式需要开启作弊并拥有管理员权限",
+    "bei.settings.cheat_mode": "作弊模式",
+    "bei.settings.bookmarks": "书签面板",
+    "bei.settings.bookmarks_front": "新书签添加到最前",
+    "bei.settings.center_search": "搜索栏位于容器下方",
+    "bei.settings.item_ids": "在提示框中显示物品 ID",
+    "bei.settings.mod_name": "在提示框中显示模组名称",
+    "bei.settings.remember_page": "记住物品列表页码",
+    "bei.settings.all_containers": "在所有容器界面中显示",
+    "bei.settings.columns": "最大列数：{}",
+    "bei.settings.columns_auto": "自动（{}）"
+}

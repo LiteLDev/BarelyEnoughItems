@@ -44,6 +44,8 @@ TextBox::TextBox(TextBox const& o)
   onChange(o.onChange),
   maxLength(o.maxLength),
   textColor(o.textColor),
+  onSubmit(o.onSubmit),
+  history(o.history),
   mText(o.mText),
   mCaret(o.mText.size()),
   mAnchor(o.mText.size()) {}
@@ -54,6 +56,8 @@ TextBox& TextBox::operator=(TextBox const& o) {
     rect        = o.rect;
     placeholder = o.placeholder;
     onChange    = o.onChange;
+    onSubmit    = o.onSubmit;
+    history     = o.history;
     maxLength   = o.maxLength;
     textColor   = o.textColor;
     mText       = o.mText;
@@ -155,6 +159,7 @@ void TextBox::setCaret(std::size_t pos, bool extend) {
 
 void TextBox::changed() {
     restartBlink();
+    mHistoryCursor.reset(); // an edit ends history browsing
     if (onChange) onChange(mText);
 }
 
@@ -204,6 +209,7 @@ void TextBox::setFocused(bool focused) {
     mFocused = focused;
     mCtrl = mShift = false;
     mBackKeyEcho = mBackCharEcho = false;
+    mHistoryCursor.reset();
     restartBlink();
     if (focused) {
         mLastRenderTime = TextInput::now(); // may be focused before its first render
@@ -211,7 +217,20 @@ void TextBox::setFocused(bool focused) {
     } else {
         mAnchor = mCaret;
         TextInput::release(*this);
+        submit();
     }
+}
+
+void TextBox::submit() {
+    if (onSubmit && mText.find_first_not_of(" \t") != std::string::npos) onSubmit(mText);
+}
+
+void TextBox::browseHistory(bool older) {
+    if (!history) return;
+    auto const& list = history();
+    auto        next = older ? mHistoryCursor.older(list, mText) : mHistoryCursor.newer(list, mText);
+    if (!next) return;
+    setText(std::move(*next), true); // setText does not end the navigation (changed() does)
 }
 
 // --- Input -----------------------------------------------------------------------------------
@@ -307,9 +326,15 @@ bool TextBox::onKey(int vk, bool down) {
         else eraseRange(mCaret, ctrl ? utf8::wordRight(mText, mCaret) : utf8::next(mText, mCaret));
         changed();
         break;
+    case VK_UP:
+        browseHistory(true);
+        break;
+    case VK_DOWN:
+        browseHistory(false);
+        break;
     case VK_RETURN:
     case VK_ESCAPE:
-        setFocused(false);
+        setFocused(false); // submits non-blank text
         break;
     case 'A':
         if (ctrl) selectAll();

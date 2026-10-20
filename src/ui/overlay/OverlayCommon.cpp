@@ -54,6 +54,7 @@ bool reopened(FrameInfo const& frame, double& lastTime) {
 
 namespace {
 std::optional<core::ItemKey> gPending;
+core::Rect                   gPopup;
 
 /// Draws the tooltip of the hovered panel item above every overlay panel.
 class OverlayTooltipLayer final : public IUiLayer {
@@ -67,6 +68,7 @@ public:
         if (!gPending) return;
         auto item = std::move(*gPending);
         gPending.reset();
+        if (gPopup.contains(frame.mouseX, frame.mouseY)) return; // the item is hidden by a popup
         if (cheatActive()) {
             if (mExtra.empty()) mExtra.push_back({});
             mExtra.front() = {mCheatHint, 0xA0A0A0};
@@ -106,6 +108,8 @@ CursorStackLayer gCursorStackLayer;
 } // namespace
 
 void requestItemTooltip(core::ItemKey const& item) { gPending = item; }
+
+void setOverlayPopup(core::Rect const& rect) { gPopup = rect; }
 
 BEI_REGISTER_UI_LAYER(gTooltipLayer);
 BEI_REGISTER_UI_LAYER(gCursorStackLayer);
