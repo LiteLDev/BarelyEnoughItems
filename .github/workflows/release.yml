@@ -1,0 +1,75 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # levibuildscript derives the mod version from the latest tag
+
+      - uses: xmake-io/github-action-setup-xmake@v1
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/AppData/Local/.xmake
+          key: xmake-${{ hashFiles('xmake.lua', 'xmake-requires.lock') }}
+          restore-keys: |
+            xmake-
+
+      - name: Setup LLVM
+        uses: ZhongRuoyu/setup-llvm@v0
+        with:
+          llvm-version: 22
+
+      - run: git config --global core.longpaths true
+
+      - run: xmake repo -u
+
+      - run: xmake f -a x64 -m release -p windows -v --target_type=client -y
+
+      - run: xmake -v -y
+
+      - name: Unit tests
+        run: |
+          xmake build -y bei-tests
+          xmake run bei-tests
+
+      - name: Check version
+        shell: pwsh
+        run: |
+          $expected = "${{ github.ref_name }}".TrimStart('v')
+          $actual = (Get-Content bin/BEI/manifest.json | ConvertFrom-Json).version
+          if ($actual -ne $expected) { throw "manifest version $actual does not match tag $expected" }
+
+      - name: Package
+        shell: pwsh
+        run: |
+          Copy-Item COPYING, COPYING.LESSER, README.md -Destination bin/BEI/
+          Compress-Archive -Path bin/BEI -DestinationPath bei-client-windows-x64.zip
+
+      - name: Release notes
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}".TrimStart('v')
+          $lines = Get-Content CHANGELOG.md
+          $start = ($lines | Select-String -Pattern "^## \[$([regex]::Escape($version))\]").LineNumber
+          if (-not $start) { throw "CHANGELOG.md has no section for $version" }
+          $rest = $lines[$start..($lines.Count - 1)]
+          $end = ($rest | Select-String -Pattern '^## \[|^\[[^\]]+\]: ' | Select-Object -First 1).LineNumber
+          $body = if ($end) { $rest[0..($end - 2)] } else { $rest }
+          ($body -join "`n").Trim() | Set-Content RELEASE_NOTES.md -Encoding utf8
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: bei-client-windows-x64.zip
+          body_path: RELEASE_NOTES.md
