@@ -7,6 +7,7 @@
 #include "ui/recipe/RecipeScreen.h"
 #include "ui/widgets/Tooltip.h"
 
+#include <algorithm>
 #include <optional>
 #include <vector>
 
@@ -21,6 +22,19 @@ bool overlayAllowed(FrameInfo const& frame) {
         return false;
     }
     return !RecipeScreen::get().isOpen();
+}
+
+core::OverlayLayout overlayLayout(FrameInfo const& frame) {
+    core::Rect used = frame.container;
+    if (!used.empty()) {
+        float left  = std::min(used.x, frame.screen.w - used.right());
+        float right = std::max(used.right(), frame.screen.w - used.x);
+        left        = std::max(left, 0.f);
+        right       = std::min(right, frame.screen.w);
+        used.x      = left;
+        used.w      = right - left;
+    }
+    return core::computeOverlayLayout(frame.screen.w, frame.screen.h, used);
 }
 
 bool reopened(FrameInfo const& frame, double& lastTime) {

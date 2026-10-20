@@ -34,6 +34,9 @@ try {
     Move-Mouse $p[0] $p[1] -Relative; Start-Sleep -Milliseconds 400
     Save-Screenshot 'hover_right_edge' $u | Out-Null
 
+    $p = Cell-Pos $items 0 ($items.rows - 1)
+    Move-Mouse $p[0] $p[1] -Relative; Start-Sleep -Milliseconds 400
+    Save-Screenshot 'hover_last_row' $u | Out-Null
     # ">" button: page 2.
     Click $items.next[0] $items.next[1] -Relative; Start-Sleep -Milliseconds 400
     Save-Screenshot 'page2_button' $u | Out-Null

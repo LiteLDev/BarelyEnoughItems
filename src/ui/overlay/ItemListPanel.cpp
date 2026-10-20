@@ -56,6 +56,8 @@ void refreshFilter() {
     bool genChanged   = gState.filteredGen != catalog.generation();
     bool queryChanged = gState.filteredQuery != query;
     if (gState.filterValid && !genChanged && !queryChanged) return;
+    // TODO(search PR #3): use setItems(&catalog.entries(), catalog.generation()) once it is on main,
+    // so the engine keeps its per-item text cache across keystrokes.
     gState.search.setItems(&catalog.entries());
     gState.filtered      = gState.search.filter(query);
     gState.filteredGen   = catalog.generation();
@@ -83,7 +85,7 @@ void ItemListPanel::render(Painter& p, FrameInfo const& frame) {
     refreshFilter();
 
     auto const& cfg    = app::Controller::get().config();
-    auto        layout = core::computeOverlayLayout(frame.screen.w, frame.screen.h, frame.container);
+    auto        layout = overlayLayout(frame);
 
     // Search bar: under the container (Config::centerSearchBar, when it fits) or at the panel bottom.
     core::Rect centered{};
