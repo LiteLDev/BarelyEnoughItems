@@ -1,0 +1,12 @@
+{
+    "bei.key.show_recipes": "BEI：查看配方",
+    "bei.key.show_recipes.description": "查看合成出鼠标所指物品的配方",
+    "bei.key.show_uses": "BEI：查看用途",
+    "bei.key.show_uses.description": "查看用到鼠标所指物品的配方",
+    "bei.key.toggle_bookmark": "BEI：添加/移除书签",
+    "bei.key.toggle_bookmark.description": "将鼠标所指物品加入书签列表，或从中移除",
+    "bei.key.toggle_overlay": "BEI：显示/隐藏物品列表",
+    "bei.key.toggle_overlay.description": "显示或隐藏物品栏界面旁的物品列表",
+    "bei.key.back": "BEI：返回上一配方页",
+    "bei.key.back.description": "返回之前查看的配方"
+}

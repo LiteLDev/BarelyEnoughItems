@@ -1,0 +1,12 @@
+{
+    "bei.key.show_recipes": "BEI: Show Recipes",
+    "bei.key.show_recipes.description": "Show the recipes that make the hovered item",
+    "bei.key.show_uses": "BEI: Show Uses",
+    "bei.key.show_uses.description": "Show the recipes that use the hovered item",
+    "bei.key.toggle_bookmark": "BEI: Toggle Bookmark",
+    "bei.key.toggle_bookmark.description": "Add the hovered item to the bookmark list, or remove it",
+    "bei.key.toggle_overlay": "BEI: Show/Hide Item List",
+    "bei.key.toggle_overlay.description": "Show or hide the item list next to inventory screens",
+    "bei.key.back": "BEI: Previous Recipe Page",
+    "bei.key.back.description": "Go back to the previously viewed recipes"
+}
