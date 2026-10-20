@@ -121,3 +121,71 @@ TEST(TransferPlanner, MaxSetsBoundedByItemsAndStackSize) {
     pool.clear();
     EXPECT_EQ(maxSets(r, pool), 0);
 }
+
+TEST(TransferPlanner, StationForCategory) {
+    EXPECT_EQ(stationFor(category::CRAFTING), Station::Crafting);
+    EXPECT_EQ(stationFor(category::FURNACE), Station::Furnace);
+    EXPECT_EQ(stationFor(category::BLAST_FURNACE), Station::BlastFurnace);
+    EXPECT_EQ(stationFor(category::SMOKER), Station::Smoker);
+    EXPECT_EQ(stationFor(category::SMITHING), Station::SmithingTable);
+    EXPECT_EQ(stationFor(category::CAMPFIRE), Station::None);
+    EXPECT_EQ(stationFor(category::BREWING), Station::None);
+    EXPECT_EQ(stationFor(category::FUEL), Station::None);
+    EXPECT_EQ(stationFor(category::ANVIL), Station::None);
+    EXPECT_EQ(stationFor(category::COMPOSTING), Station::None);
+    EXPECT_EQ(stationFor("bei:tag/custom"), Station::None);
+}
+
+TEST(TransferPlanner, FurnaceTagsRoundTrip) {
+    for (auto s : {Station::Furnace, Station::BlastFurnace, Station::Smoker}) {
+        EXPECT_FALSE(furnaceTagOf(s).empty());
+        EXPECT_EQ(furnaceStationOf(furnaceTagOf(s)), s);
+    }
+    EXPECT_EQ(furnaceTagOf(Station::Crafting), "");
+    EXPECT_EQ(furnaceTagOf(Station::SmithingTable), "");
+    EXPECT_EQ(furnaceStationOf("campfire"), Station::None);
+    EXPECT_EQ(furnaceStationOf(""), Station::None);
+}
+
+TEST(TransferPlanner, PickFuelFollowsPreferenceAndSkipsIngredient) {
+    std::vector<ItemKey>   fuels{{"coal", 0}, {"charcoal", 0}, {"log", ItemKey::ANY_AUX}};
+    std::vector<PoolEntry> pool;
+    addToPool(pool, {"log", 2}, 10, 64);
+    addToPool(pool, {"charcoal", 0}, 3, 64);
+    // Coal is preferred but missing: charcoal (before logs, by preference order).
+    EXPECT_EQ(pickFuel(fuels, pool, {"iron_ore", 0}), (ItemKey{"charcoal", 0}));
+    // A wildcard fuel matches a concrete aux; the ingredient itself is never used as fuel.
+    pool.clear();
+    addToPool(pool, {"log", 2}, 10, 64);
+    EXPECT_EQ(pickFuel(fuels, pool, {"iron_ore", 0}), (ItemKey{"log", 2}));
+    EXPECT_TRUE(pickFuel(fuels, pool, {"log", 2}).empty());
+    // Another log variant still burns while smelting this one.
+    addToPool(pool, {"log", 1}, 4, 64);
+    EXPECT_EQ(pickFuel(fuels, pool, {"log", 2}), (ItemKey{"log", 1}));
+    EXPECT_TRUE(pickFuel({}, pool, {}).empty());
+}
+
+TEST(TransferPlanner, SmeltingAndSmithingSets) {
+    // Smelting: one input of count 1; shift moves up to a full stack.
+    RecipeView smelt;
+    smelt.category = category::FURNACE;
+    smelt.inputs   = {any("raw_iron")};
+    std::vector<PoolEntry> pool;
+    addToPool(pool, {"raw_iron", 0}, 100, 64);
+    EXPECT_EQ(maxSets(smelt, pool), 64);
+    EXPECT_TRUE(assign(smelt, pool, 1).complete());
+
+    // Smithing: template, base, addition; an unstackable base allows one set.
+    RecipeView smith;
+    smith.category = category::SMITHING;
+    smith.inputs   = {exact("upgrade"), any("diamond_sword"), exact("netherite_ingot")};
+    pool.clear();
+    addToPool(pool, {"upgrade", 0}, 3, 64);
+    addToPool(pool, {"diamond_sword", 0}, 2, 1);
+    addToPool(pool, {"netherite_ingot", 0}, 3, 64);
+    EXPECT_EQ(maxSets(smith, pool), 1);
+    pool.clear();
+    addToPool(pool, {"diamond_sword", 0}, 1, 1);
+    addToPool(pool, {"netherite_ingot", 0}, 1, 64);
+    EXPECT_EQ(assign(smith, pool, 1).missing, (std::vector<int>{0}));
+}

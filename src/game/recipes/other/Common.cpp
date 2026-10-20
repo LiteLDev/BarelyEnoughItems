@@ -131,7 +131,14 @@ std::vector<FuelInfo> collectFuels(Level& level) {
     std::vector<FuelInfo>                                fuels;
     std::unordered_set<core::ItemKey, core::ItemKeyHash> seen;
     forEachRegisteredItem(level, [&](Item const& item) {
+        // getItemBurnDuration only knows the hardcoded fuel table; data-driven fuels (the "fuel"
+        // item component, e.g. coal and charcoal in 1.26) are only seen through a stack.
         float ticks = FurnaceBlockActor::getItemBurnDuration(item, kFurnaceCookTicks);
+        if (!(ticks > 0.0f)) {
+            ItemInstance stack;
+            stack.reinit(item, 1, 0);
+            if (!stack.isNull()) ticks = FurnaceBlockActor::getBurnDuration(stack, kFurnaceCookTicks);
+        }
         if (!(ticks > 0.0f)) return;
         auto key = keyOf(item, 0);
         if (key.empty() || !seen.insert(key).second) return;

@@ -1,4 +1,4 @@
-# Other recipe providers (smelting family, stonecutter, smithing, cartography, brewing, fuel,
+# Other recipe providers (smelting family, stonecutter, smithing, cartography, brewing, fuel, anvil, composting,
 # generic fallback): per-category counts are logged on index rebuild, and "U" on an item with
 # smelting/fuel uses opens the recipe screen.
 # Screenshots: out/other-recipes/{hover,uses}.png
@@ -9,7 +9,7 @@ $log = Get-LeviLog
 $expected = @(
     'minecraft:furnace', 'minecraft:blast_furnace', 'minecraft:smoker', 'minecraft:campfire',
     'minecraft:soul_campfire', 'minecraft:stonecutter', 'minecraft:smithing', 'minecraft:cartography',
-    'minecraft:brewing', 'minecraft:fuel'
+    'minecraft:brewing', 'minecraft:fuel', 'minecraft:anvil', 'minecraft:composting'
 )
 foreach ($cat in $expected) {
     $line = $log | Where-Object { $_ -match "Recipes \[$([regex]::Escape($cat))\]: (\d+)" } | Select-Object -Last 1

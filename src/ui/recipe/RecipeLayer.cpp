@@ -5,6 +5,7 @@
 #include "app/I18n.h"
 #include "game/items/ItemCatalog.h"
 #include "game/recipes/RecipeManager.h"
+#include "mod/Log.h"
 #include "ui/UiRoot.h"
 #include "ui/gfx/Painter.h"
 #include "ui/widgets/Tooltip.h"
@@ -360,8 +361,9 @@ void RecipeLayer::drawRecipes(Painter& p, FrameInfo const& frame) {
         }
 
         // ---- Recipe transfer ("+") -------------------------------------------------------
-        // actions::Actions decides whether the recipe can be moved into the open crafting
-        // grid; the button only appears when it can, and missing inputs are tinted red.
+        // actions::Actions decides whether the recipe can be moved into the open station screen
+        // (crafting grid, furnace, smithing table); the button only appears when it can, and
+        // missing inputs are tinted red.
         auto const& check = transferCheck(recipeIndex, view, frame.time);
         ctx.missingInputs = check.possible && !check.missingInputs.empty() ? &check.missingInputs : nullptr;
 
@@ -375,6 +377,38 @@ void RecipeLayer::drawRecipes(Painter& p, FrameInfo const& frame) {
             mPlus.push_back({r, recipeIndex, check.canCraft()});
         }
     }
+    logStateIfChanged(frame);
+}
+
+void RecipeLayer::logStateIfChanged(FrameInfo const& frame) {
+    // On change only: lets tests (tools/e2e) find the shown tab and the first "+" without
+    // hardcoding positions.
+    if (auto const& tabId = mTabs[static_cast<std::size_t>(mSel)].info.id; tabId != mLoggedTab) {
+        mLoggedTab = tabId;
+        log().info("Recipe screen tab: {}", tabId);
+    }
+    core::Rect  rect;
+    bool        ready = false;
+    std::size_t id    = 0;
+    if (!mPlus.empty()) rect = mPlus.front().rect, ready = mPlus.front().canCraft, id = mPlus.front().recipe;
+    bool const same = rect.x == mLoggedPlus.x && rect.y == mLoggedPlus.y && rect.w == mLoggedPlus.w
+                   && rect.h == mLoggedPlus.h && ready == mLoggedPlusReady && id == mLoggedPlusRecipe;
+    if (same || frame.screen.w <= 0 || frame.screen.h <= 0) return;
+    mLoggedPlus       = rect;
+    mLoggedPlusReady  = ready;
+    mLoggedPlusRecipe = id;
+    if (mPlus.empty()) {
+        log().info("Recipe transfer button: none");
+        return;
+    }
+    auto& index = game::RecipeManager::get().index();
+    log().info(
+        "Recipe transfer button: plus0={:.3f},{:.3f} ready={} recipe={}",
+        (rect.x + rect.w / 2) / frame.screen.w,
+        (rect.y + rect.h / 2) / frame.screen.h,
+        ready,
+        id < index.size() ? index.recipe(id).id : std::string{}
+    );
 }
 
 void RecipeLayer::drawWorkstations(Painter& p, FrameInfo const& frame) {

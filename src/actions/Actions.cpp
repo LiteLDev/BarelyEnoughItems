@@ -1,5 +1,6 @@
 #include "actions/Actions.h"
 
+#include "actions/StationTransfer.h"
 #include "actions/TransferPlanner.h"
 #include "app/I18n.h"
 #include "game/Game.h"
@@ -246,6 +247,7 @@ void Actions::install() {
     CraftingTickHook::hook();
     CraftingTerminateHook::hook();
     ContainerScreenDtorHook::hook();
+    station::install();
     // JEI: in cheat mode a click on a panel item while holding a stack deletes the stack (creative only;
     // in survival the click does nothing, so nothing is given or opened while an item is held).
     ui::ItemListPanel::cheatClickHook = [](ui::MouseButton button, bool down, float, float) {
@@ -267,6 +269,7 @@ void Actions::uninstall() {
 #ifdef BEI_DEV
     dev::uninstall();
 #endif
+    station::uninstall();
     ContainerScreenDtorHook::unhook();
     CraftingTerminateHook::unhook();
     CraftingTickHook::unhook();
@@ -279,6 +282,7 @@ int Actions::currentCraftingGridSize() const {
 }
 
 TransferCheck Actions::checkTransfer(core::RecipeView const& recipe) {
+    if (station::handles(recipe)) return station::check(recipe);
     TransferCheck result;
     if (recipe.category != core::category::CRAFTING) return result;
     result.block = TransferBlock::NoGrid;
@@ -318,12 +322,21 @@ std::string Actions::transferTooltip(TransferCheck const& check) {
             "bei.actions.transfer.noGrid",
             "Open a crafting table (or the inventory for 2x2 recipes) to move items"
         );
+    case TransferBlock::NoFurnace:
+        return app::tr("bei.actions.transfer.noFurnace", "Open a furnace to move items");
+    case TransferBlock::NoBlastFurnace:
+        return app::tr("bei.actions.transfer.noBlastFurnace", "Open a blast furnace to move items");
+    case TransferBlock::NoSmoker:
+        return app::tr("bei.actions.transfer.noSmoker", "Open a smoker to move items");
+    case TransferBlock::NoSmithingTable:
+        return app::tr("bei.actions.transfer.noSmithingTable", "Open a smithing table to move items");
     default:
         return {};
     }
 }
 
 bool Actions::transfer(core::RecipeView const& recipe, bool maxSetsWanted) {
+    if (station::handles(recipe)) return station::transfer(recipe, maxSetsWanted);
     auto check = checkTransfer(recipe);
     if (!check.canCraft()) return false;
     auto* mgr = manager();

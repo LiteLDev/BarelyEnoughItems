@@ -4,5 +4,8 @@
     "bei.recipe.map_extending": "缩小地图比例（扩展范围）",
     "bei.recipe.map_locking": "锁定地图",
     "bei.recipe.map_upgrading": "为地图添加位置标记",
-    "bei.fuel.burn_time": "燃烧 {seconds} 秒，可烧炼 {items} 个物品"
+    "bei.fuel.burn_time": "燃烧 {seconds} 秒，可烧炼 {items} 个物品",
+    "bei.anvil.repair_material": "每个材料恢复 25% 耐久度",
+    "bei.anvil.combine": "合并两个受损物品的耐久度",
+    "bei.composting.chance": "堆肥层数 +1 的概率：{chance}%"
 }
