@@ -6,9 +6,30 @@
 #include "core/model/ItemKey.h"
 #include "core/model/RecipeView.h"
 
+#include <string_view>
 #include <vector>
 
 namespace bei::actions {
+
+/// The vanilla screen a recipe category is transferred into.
+enum class Station {
+    None,          ///< Not transferable (campfire, brewing, fuel...).
+    Crafting,      ///< Inventory 2x2 grid or crafting table.
+    Furnace,       ///< Furnace screen.
+    BlastFurnace,  ///< Blast furnace screen.
+    Smoker,        ///< Smoker screen.
+    SmithingTable, ///< Smithing table screen (template, base, addition).
+};
+
+/// Station for a RecipeView::category (core::category ids).
+[[nodiscard]] Station stationFor(std::string_view category) noexcept;
+
+/// Game recipe tag of a furnace-like station ("furnace", "blast_furnace", "smoker"), "" otherwise.
+/// FurnaceScreenController::mRecipeTag holds the same tag.
+[[nodiscard]] std::string_view furnaceTagOf(Station station) noexcept;
+
+/// Inverse of furnaceTagOf (Station::None for unknown tags).
+[[nodiscard]] Station furnaceStationOf(std::string_view tag) noexcept;
 
 /// One concrete item kind available to the player (inventory plus crafting grid).
 struct PoolEntry {
@@ -44,6 +65,13 @@ struct Assignment {
 /// Largest number of sets (1..cap) that can be fully assigned, also bounded by the max stack size
 /// of the chosen items. 0 if not even one set is possible.
 [[nodiscard]] int maxSets(core::RecipeView const& recipe, std::vector<PoolEntry> const& pool, int cap = 64);
+
+/// Fuel to put into an empty furnace fuel slot: the first of `fuels` (preference order) that the
+/// pool holds, skipping the concrete `ingredient` (never burn the item being smelted, e.g. logs
+/// for charcoal). Wildcard fuel keys match any aux. Returns the concrete pool key, or an empty
+/// key when the player has no usable fuel.
+[[nodiscard]] core::ItemKey
+pickFuel(std::vector<core::ItemKey> const& fuels, std::vector<PoolEntry> const& pool, core::ItemKey const& ingredient);
 
 /// Add `count` of concrete `key` to the pool (merging with an existing entry).
 void addToPool(std::vector<PoolEntry>& pool, core::ItemKey const& key, int count, int maxStack);

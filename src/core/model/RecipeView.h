@@ -20,6 +20,8 @@ inline constexpr char const* SMITHING      = "minecraft:smithing";
 inline constexpr char const* STONECUTTER   = "minecraft:stonecutter";
 inline constexpr char const* CARTOGRAPHY   = "minecraft:cartography";
 inline constexpr char const* FUEL          = "minecraft:fuel";
+inline constexpr char const* ANVIL         = "minecraft:anvil";
+inline constexpr char const* COMPOSTING    = "minecraft:composting";
 } // namespace category
 
 /// How the recipe screen lays out a category.

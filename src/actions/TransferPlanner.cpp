@@ -5,6 +5,47 @@
 
 namespace bei::actions {
 
+Station stationFor(std::string_view category) noexcept {
+    if (category == core::category::CRAFTING) return Station::Crafting;
+    if (category == core::category::FURNACE) return Station::Furnace;
+    if (category == core::category::BLAST_FURNACE) return Station::BlastFurnace;
+    if (category == core::category::SMOKER) return Station::Smoker;
+    if (category == core::category::SMITHING) return Station::SmithingTable;
+    return Station::None;
+}
+
+std::string_view furnaceTagOf(Station station) noexcept {
+    switch (station) {
+    case Station::Furnace:
+        return "furnace";
+    case Station::BlastFurnace:
+        return "blast_furnace";
+    case Station::Smoker:
+        return "smoker";
+    default:
+        return {};
+    }
+}
+
+Station furnaceStationOf(std::string_view tag) noexcept {
+    for (auto s : {Station::Furnace, Station::BlastFurnace, Station::Smoker}) {
+        if (furnaceTagOf(s) == tag) return s;
+    }
+    return Station::None;
+}
+
+core::ItemKey
+pickFuel(std::vector<core::ItemKey> const& fuels, std::vector<PoolEntry> const& pool, core::ItemKey const& ingredient) {
+    for (auto const& fuel : fuels) {
+        for (auto const& entry : pool) {
+            if (entry.count <= 0 || !fuel.matches(entry.key)) continue;
+            if (!ingredient.empty() && entry.key == ingredient) continue;
+            return entry.key;
+        }
+    }
+    return {};
+}
+
 GridMapping mapToGrid(core::RecipeView const& recipe, int gridSize) {
     GridMapping result;
     auto const  n = static_cast<int>(recipe.inputs.size());

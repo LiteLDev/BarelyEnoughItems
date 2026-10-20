@@ -3,5 +3,9 @@
     "bei.actions.transfer.moveAll": "Shift+点击：尽可能多地移动",
     "bei.actions.transfer.missing": "缺少物品",
     "bei.actions.transfer.noGrid": "打开工作台（2x2 配方也可在物品栏中）以移动物品",
-    "bei.actions.transfer.tooLarge": "此配方需要工作台"
+    "bei.actions.transfer.tooLarge": "此配方需要工作台",
+    "bei.actions.transfer.noFurnace": "打开熔炉以移动物品",
+    "bei.actions.transfer.noBlastFurnace": "打开高炉以移动物品",
+    "bei.actions.transfer.noSmoker": "打开烟熏炉以移动物品",
+    "bei.actions.transfer.noSmithingTable": "打开锻造台以移动物品"
 }

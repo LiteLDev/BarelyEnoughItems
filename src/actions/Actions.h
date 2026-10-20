@@ -12,10 +12,14 @@ namespace bei::actions {
 
 /// Why a transfer is not possible (TransferCheck::possible == false).
 enum class TransferBlock {
-    None,        ///< Possible.
-    Unsupported, ///< Not a crafting recipe.
-    NoGrid,      ///< No crafting screen is open.
-    TooLarge,    ///< The recipe does not fit the open grid (3x3 recipe in the 2x2 inventory).
+    None,            ///< Possible.
+    Unsupported,     ///< No transfer for this category (campfire, brewing...) or recipe.
+    NoGrid,          ///< Crafting recipe, but no crafting screen is open.
+    TooLarge,        ///< The recipe does not fit the open grid (3x3 recipe in the 2x2 inventory).
+    NoFurnace,       ///< Smelting recipe, but no furnace screen is open.
+    NoBlastFurnace,  ///< Blasting recipe, but no blast furnace screen is open.
+    NoSmoker,        ///< Smoking recipe, but no smoker screen is open.
+    NoSmithingTable, ///< Smithing recipe, but no smithing table screen is open.
 };
 
 /// Result of checking whether a recipe can be moved into the open crafting grid.
@@ -30,9 +34,19 @@ struct TransferCheck {
 ///
 /// Contract:
 /// - All calls on the client thread; never touch inventories from input callbacks directly.
-/// - checkTransfer/transfer only support crafting-table recipes in the crafting table screen
-///   and recipes fitting 2x2 in the survival inventory screen; everything else is not possible.
-/// - transfer(maxSets=true) moves as many sets as available (shift-click in JEI).
+/// - checkTransfer/transfer support:
+///   - crafting recipes in the crafting table screen, and recipes fitting 2x2 in the survival
+///     inventory screen;
+///   - furnace / blast furnace / smoker recipes in the screen of that exact block: the input goes
+///     into the input slot, and when the fuel slot is empty one stack of a fuel from the recipe's
+///     catalysts (never the item being smelted) goes into the fuel slot. Fuel is optional: a
+///     missing fuel does not make the recipe "missing items";
+///   - smithing recipes in the smithing table screen (template, base, addition slots).
+///   Everything else is not possible (TransferBlock says why).
+/// - Items already in the target slots count as available; they are moved back to the inventory
+///   first.
+/// - transfer(maxSets=true) moves as many sets as available (shift-click in JEI); for furnaces
+///   that is up to one stack of the input.
 /// - give() only works when canCheat() (operator / creative); it uses the /give command.
 ///
 /// Implementation notes:

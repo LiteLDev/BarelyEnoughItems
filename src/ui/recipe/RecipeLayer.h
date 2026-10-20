@@ -64,6 +64,7 @@ private:
     void drawRecipes(Painter& p, FrameInfo const& frame);
     void drawWorkstations(Painter& p, FrameInfo const& frame);
     void drawTooltips(Painter& p, FrameInfo const& frame);
+    void logStateIfChanged(FrameInfo const& frame); ///< Also logs the shown tab on change.
 
     // Focus and data.
     core::RecipeFocus mFocus;
@@ -100,6 +101,10 @@ private:
     std::vector<SlotHit> mSlots;
     std::vector<HintHit> mHints;
     std::vector<PlusHit> mPlus;
+    core::Rect           mLoggedPlus;            ///< Last logged first "+" (logStateIfChanged).
+    bool                 mLoggedPlusReady  = false;
+    std::size_t          mLoggedPlusRecipe = static_cast<std::size_t>(-1); ///< -1: nothing logged yet.
+    std::string          mLoggedTab;             ///< Last logged tab (category id).
 };
 
 } // namespace bei::ui::recipe
