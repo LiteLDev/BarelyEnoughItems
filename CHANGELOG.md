@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Composting category: every compostable item with its chance to raise the compost level.
+
+### Fixed
+
+- Data-driven fuels such as coal and charcoal were missing from the Fuel category and from the smelting fuel slots.
+
 ## [0.1.0] - 2026-10-21
 
 ### Added
