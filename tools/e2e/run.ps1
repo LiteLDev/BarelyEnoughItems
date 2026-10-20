@@ -31,6 +31,9 @@ try {
     if (Get-GameProcess) { Write-Step "closing a running game first"; Stop-Game }
     if (-not $NoDeploy) { Deploy-Mod }
     Restore-TestWorld
+    # Optional scenarios\<name>.prelaunch.ps1, e.g. to seed mods\BEI\config before the mod loads.
+    $prelaunch = Join-Path $PSScriptRoot "scenarios/$Scenario.prelaunch.ps1"
+    if (Test-Path $prelaunch) { . $prelaunch }
     Start-Game | Out-Null
     Wait-GameReady
     Enter-TestWorld
