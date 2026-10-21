@@ -1,9 +1,9 @@
 # BEI
 
 [![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg)](https://github.com/RichardLitt/standard-readme)
-[![Build](https://github.com/LiteLDev/bei/actions/workflows/build.yml/badge.svg)](https://github.com/LiteLDev/bei/actions/workflows/build.yml)
-[![Release](https://img.shields.io/github/v/release/LiteLDev/bei)](https://github.com/LiteLDev/bei/releases)
-[![License](https://img.shields.io/github/license/LiteLDev/bei)](COPYING.LESSER)
+[![Build](https://github.com/LiteLDev/BarelyEnoughItems/actions/workflows/build.yml/badge.svg)](https://github.com/LiteLDev/BarelyEnoughItems/actions/workflows/build.yml)
+[![Release](https://img.shields.io/github/v/release/LiteLDev/BarelyEnoughItems)](https://github.com/LiteLDev/BarelyEnoughItems/releases)
+[![License](https://img.shields.io/github/license/LiteLDev/BarelyEnoughItems)](COPYING.LESSER)
 
 Barely Enough Items: a JEI-style item list and recipe viewer for Minecraft Bedrock Edition, as a LeviLamina client mod.
 
@@ -53,10 +53,10 @@ Requirements:
 With [lip](https://github.com/futrime/lip):
 
 ```sh
-lip install github.com/LiteLDev/bei#client
+lip install github.com/LiteLDev/BarelyEnoughItems#client
 ```
 
-Manually: download `bei-client-windows-x64.zip` from the [latest release](https://github.com/LiteLDev/bei/releases/latest) and extract it so that `BEI/` ends up in the game's `mods/` folder, next to `LeviLamina/`.
+Manually: download `bei-client-windows-x64.zip` from the [latest release](https://github.com/LiteLDev/BarelyEnoughItems/releases/latest) and extract it so that `BEI/` ends up in the game's `mods/` folder, next to `LeviLamina/`.
 
 ## Usage
 

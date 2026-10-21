@@ -4,7 +4,7 @@ Thanks for helping! Bug reports, ideas and pull requests are all welcome.
 
 ## Reporting bugs and requesting features
 
-Use the [issue templates](https://github.com/LiteLDev/bei/issues/new/choose). For bugs, include:
+Use the [issue templates](https://github.com/LiteLDev/BarelyEnoughItems/issues/new/choose). For bugs, include:
 
 - the BEI version;
 - the LeviLamina version;
