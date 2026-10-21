@@ -116,8 +116,9 @@ public:
             setOverlayPopup(mPopup);
         }
 
-        // Tooltips last (drawTooltip flushes, so they stay on top).
-        if (mButton.rect.contains(frame.mouseX, frame.mouseY)) {
+        // Tooltips last (drawTooltip flushes, so they stay on top). The button's own tooltip is
+        // hidden while the popup is open: it would cover the popup's bottom rows.
+        if (!mOpen && mButton.rect.contains(frame.mouseX, frame.mouseY)) {
             std::vector<TooltipLine> lines{
                 {mTitle, 0xFFFFFF}
             };

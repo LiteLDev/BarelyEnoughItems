@@ -353,6 +353,9 @@ function Get-LeviLog([switch]$All) {
     try { $text = (New-Object System.IO.StreamReader($fs, [Text.Encoding]::UTF8)).ReadToEnd() } finally { $fs.Dispose() }
     $lines = @($text -split "`r?`n" | Where-Object { $_ -ne '' })
     if ($All) { return $lines }
+    # LeviLamina rotates latest.log (e.g. at midnight); a shorter file means a fresh one, so
+    # everything in it belongs to this session.
+    if ($lines.Count -lt $script:LogOffset) { $script:LogOffset = 0 }
     if ($script:LogOffset -ge $lines.Count) { return @() }
     return $lines[$script:LogOffset..($lines.Count - 1)]
 }
@@ -389,16 +392,30 @@ function Wait-GameReady([int]$TimeoutSeconds = 180) {
     Start-Sleep -Seconds 2
 }
 
-function Enter-TestWorld([int]$LoadSeconds = 30) {
-    Focus-Game
-    Click 0.498 0.474 -Relative     # Play
-    Start-Sleep -Seconds 4
-    Click 0.173 0.43 -Relative      # first world thumbnail (BEI-Test, most recently played)
-    Start-Sleep -Seconds $LoadSeconds
-    Wait-LogLine 'Item catalog: \d+ items' 60 | Out-Null
-    Start-Sleep -Seconds 2
-    Focus-Game
-    Write-Step "in world"
+function Enter-TestWorld([int]$LoadSeconds = 30, [int]$Attempts = 3) {
+    for ($attempt = 1; $attempt -le $Attempts; $attempt++) {
+        Focus-Game
+        Click 0.498 0.474 -Relative     # Play
+        Start-Sleep -Seconds 4
+        Click 0.173 0.43 -Relative      # first world thumbnail (BEI-Test, most recently played)
+        Start-Sleep -Seconds $LoadSeconds
+        try {
+            Wait-LogLine 'Item catalog: \d+ items' 60 | Out-Null
+            Start-Sleep -Seconds 2
+            Focus-Game
+            Write-Step "in world"
+            return
+        } catch {
+            if ($attempt -eq $Attempts) { throw }
+            # The game sometimes fails to join its own local world ("Connection timed out",
+            # error "Kelp"). Leave the error dialog and try again.
+            Write-Step "world join failed (attempt $attempt): $_; retrying"
+            Save-Screenshot "join-failed-$attempt" 'e2e' | Out-Null
+            Focus-Game
+            Click 0.24 0.68 -Relative   # "Back to menu" on the connection error dialog
+            Start-Sleep -Seconds 5
+        }
+    }
 }
 
 # Open the survival inventory (E) and wait for it to render.
