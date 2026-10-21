@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-10-21
+
 ### Fixed
 
 - `lip install github.com/LiteLDev/BarelyEnoughItems#client` failed after the repository rename, because `tooth.json` still declared the old path `github.com/LiteLDev/bei`.
@@ -58,5 +60,6 @@ First release.
 - **In-game settings** popup (wrench button next to the search bar). `Ctrl`-click it to toggle cheat mode.
 - **Translations**: English and Simplified Chinese.
 
-[Unreleased]: https://github.com/LiteLDev/BarelyEnoughItems/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/LiteLDev/BarelyEnoughItems/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/LiteLDev/BarelyEnoughItems/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/LiteLDev/BarelyEnoughItems/releases/tag/v0.1.0
