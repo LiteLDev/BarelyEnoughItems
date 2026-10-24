@@ -6,7 +6,7 @@
   "info": {
     "name": "BEI",
     "description": "Barely Enough Items: a JEI-style item list and recipe viewer for Minecraft Bedrock Edition",
-    "tags": ["platform:levilamina", "type:mod", "client"],
+    "tags": ["platform:levilamina", "type:mod", "client", "category:utility", "recipe-viewer", "inventory", "item-list"],
     "avatar_url": "https://raw.githubusercontent.com/LiteLDev/BarelyEnoughItems/main/docs/logo.png"
   },
   "variants": [
