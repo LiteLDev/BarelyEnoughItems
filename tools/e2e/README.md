@@ -2,7 +2,7 @@
 
 These tests drive the **real game** on this machine:
 - the LeviLauncher instance `1.26.51.01` at `%APPDATA%\levilauncher.exe\versions\1.26.51.01`;
-- **real input** (`SendInput`);
+- **input through [LeviHeadlessInput](https://github.com/LiteLDev/LeviHeadlessInput)** (default: the game stays in the background and never takes your mouse, keyboard or foreground; built in `%USERPROFILE%\Desktop\LeviHeadlessInput\bin\LeviHeadlessInput` or `$env:LEVI_HEADLESS_INPUT_DIR`), or **real input** (`SendInput`) with `-Foreground`;
 - **window screenshots** (`PrintWindow`).
 
 There is one game instance per machine, so `run.ps1` holds a machine-wide lock (`%APPDATA%\levilauncher.exe\bei-e2e.lock`) for the whole run. Parallel worktrees simply queue.
@@ -11,7 +11,12 @@ There is one game instance per machine, so `run.ps1` holds a machine-wide lock (
 xmake -y                                           # build bin\BEI first
 pwsh -NoProfile -File tools/e2e/run.ps1 -Scenario smoke
 pwsh -NoProfile -File tools/e2e/run.ps1 -Scenario smoke -KeepOpen   # leave the game open afterwards
+pwsh -NoProfile -File tools/e2e/run.ps1 -Scenario smoke -Foreground # real mouse and keyboard
 ```
+
+The harness only touches the games of its own instance, and moves other mods in that instance aside for the run (they are put back afterwards).
+
+`showcase` stages the pictures and videos for `docs/showcase/` (`recorder.ps1` grabs video frames); `showcase-encode.ps1` encodes them.
 
 `run.ps1` performs these steps:
 1. Takes the lock.

@@ -1,0 +1,70 @@
+{
+  "items": [
+    {
+      "kind": "image",
+      "src": "inventory.webp",
+      "width": 1280, "height": 720,
+      "title": { "en": "Every item, right next to your inventory", "zh-CN": "所有物品，就在背包旁边" },
+      "caption": { "en": "The item list sits on the right of every container screen, your bookmarks on the left.", "zh-CN": "物品列表在每个容器界面的右侧，书签在左侧。" }
+    },
+    {
+      "kind": "video",
+      "src": "transfer.mp4",
+      "poster": "transfer-poster.webp",
+      "width": 1280, "height": 720,
+      "title": { "en": "One click fills the crafting grid", "zh-CN": "一键摆好合成格" },
+      "caption": { "en": "Open a recipe, press +, and the ingredients jump from your inventory into the crafting table.", "zh-CN": "打开配方，点一下 +，材料就从背包放进工作台。" }
+    },
+    {
+      "kind": "video",
+      "src": "search.mp4",
+      "poster": "search-poster.webp",
+      "width": 1280, "height": 720,
+      "title": { "en": "Search as you type", "zh-CN": "边输入边搜索" },
+      "caption": { "en": "Narrow the list down with words, exclusions like -ore, or tags like #logs.", "zh-CN": "用关键词、-ore 这样的排除词或 #logs 这样的标签筛选列表。" }
+    },
+    {
+      "kind": "image",
+      "src": "recipes.webp",
+      "width": 1280, "height": 720,
+      "title": { "en": "How to make it: press R", "zh-CN": "怎么做？按 R" },
+      "caption": { "en": "Every way to get an item, with a tab for each workstation: crafting, smelting, blasting and more.", "zh-CN": "列出获得一个物品的所有方法，每种工作台一个标签页：合成、熔炼、高炉等等。" }
+    },
+    {
+      "kind": "image",
+      "src": "uses.webp",
+      "width": 1280, "height": 720,
+      "title": { "en": "What is it for: press U", "zh-CN": "有什么用？按 U" },
+      "caption": { "en": "All the recipes that use an item, here the 13 pages that need iron ingots.", "zh-CN": "列出用到某个物品的所有配方，比如这里用到铁锭的 13 页。" }
+    },
+    {
+      "kind": "image",
+      "src": "bookmarks.webp",
+      "width": 1280, "height": 720,
+      "title": { "en": "Bookmarks for the items you keep looking up", "zh-CN": "常查的物品收进书签" },
+      "caption": { "en": "Press A over any item to pin it to the list on the left.", "zh-CN": "鼠标指向任意物品按 A，就能把它固定到左侧列表。" }
+    },
+    {
+      "kind": "video",
+      "src": "cheat.mp4",
+      "poster": "cheat-poster.webp",
+      "width": 1280, "height": 720,
+      "title": { "en": "Cheat mode", "zh-CN": "作弊模式" },
+      "caption": { "en": "With cheats on, Ctrl-click the settings button and click any item to take a stack.", "zh-CN": "开启作弊后，按住 Ctrl 点设置按钮，再点物品就能直接拿一组。" }
+    },
+    {
+      "kind": "image",
+      "src": "brewing.webp",
+      "width": 1280, "height": 720,
+      "title": { "en": "Brewing, smithing, stonecutting and more", "zh-CN": "酿造、锻造、切石，应有尽有" },
+      "caption": { "en": "Press U on a workstation to see everything it can make, like all 102 brewing recipes.", "zh-CN": "对着工作台按 U，查看它能做的全部东西，比如全部 102 个酿造配方。" }
+    },
+    {
+      "kind": "image",
+      "src": "settings.webp",
+      "width": 1280, "height": 720,
+      "title": { "en": "Settings in the game", "zh-CN": "游戏内设置" },
+      "caption": { "en": "The button next to the search bar opens the options: bookmarks, tooltips, search bar position and more.", "zh-CN": "搜索栏旁的按钮打开选项：书签、提示信息、搜索栏位置等。" }
+    }
+  ]
+}

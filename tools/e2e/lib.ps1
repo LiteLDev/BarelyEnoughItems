@@ -15,6 +15,11 @@ $script:ModsDir      = Join-Path $script:VersionDir 'mods'
 $script:GameExe      = Join-Path $script:VersionDir 'Minecraft.Windows.exe'
 $script:LockFile     = Join-Path $script:LauncherData 'bei-e2e.lock'
 $script:OutDir       = Join-Path $script:RepoRoot 'tools\e2e\out'
+# LeviHeadlessInput (https://github.com/LiteLDev/LeviHeadlessInput), used by run.ps1 unless
+# -Foreground: its build output (DLL, HeadlessInput.psm1, harness-shim.ps1).
+$script:HeadlessInputDir = if ($env:LEVI_HEADLESS_INPUT_DIR) { $env:LEVI_HEADLESS_INPUT_DIR } else {
+    Join-Path $env:USERPROFILE 'Desktop\LeviHeadlessInput\bin\LeviHeadlessInput' }
+$script:Headless     = $false
 
 if (-not ('BeiE2E.Native' -as [type])) {
     Add-Type -AssemblyName System.Drawing
@@ -67,7 +72,16 @@ public static class Native {
 
     static void Send(INPUT i) { SendInput(1, new[] { i }, Marshal.SizeOf(typeof(INPUT))); }
 
+    // Set by LeviHeadlessInput's harness-shim.ps1 (Register-HeadlessNative): the input methods
+    // below then go to the game through the mod's control pipe instead of SendInput.
+    public static Action<ushort, bool> KeyRedirect;
+    public static Action<int, bool> MouseButtonRedirect;
+    public static Action<int> WheelRedirect;
+    public static Action<char> UnicodeRedirect;
+    public static Action<int, int> MoveRelativeRedirect;
+
     public static void Key(ushort vk, bool up) {
+        if (KeyRedirect != null) { KeyRedirect(vk, up); return; }
         var i = new INPUT { type = INPUT_KEYBOARD };
         i.u.ki.wVk = vk;
         i.u.ki.wScan = (ushort)MapVirtualKey(vk, 0);
@@ -76,20 +90,24 @@ public static class Native {
         Send(i);
     }
     public static void Unicode(char c) {
+        if (UnicodeRedirect != null) { UnicodeRedirect(c); return; }
         var down = new INPUT { type = INPUT_KEYBOARD }; down.u.ki.wScan = c; down.u.ki.dwFlags = KEYEVENTF_UNICODE;
         var up = new INPUT { type = INPUT_KEYBOARD }; up.u.ki.wScan = c; up.u.ki.dwFlags = KEYEVENTF_UNICODE | KEYEVENTF_KEYUP;
         Send(down); Send(up);
     }
     public static void MouseButton(int button, bool up) {
+        if (MouseButtonRedirect != null) { MouseButtonRedirect(button, up); return; }
         var i = new INPUT { type = INPUT_MOUSE };
         if (button == 0) i.u.mi.dwFlags = up ? MOUSEEVENTF_LEFTUP : MOUSEEVENTF_LEFTDOWN;
         else i.u.mi.dwFlags = up ? MOUSEEVENTF_RIGHTUP : MOUSEEVENTF_RIGHTDOWN;
         Send(i);
     }
     public static void Wheel(int delta) {
+        if (WheelRedirect != null) { WheelRedirect(delta); return; }
         var i = new INPUT { type = INPUT_MOUSE }; i.u.mi.dwFlags = MOUSEEVENTF_WHEEL; i.u.mi.mouseData = (uint)delta; Send(i);
     }
     public static void MoveRelative(int dx, int dy) {
+        if (MoveRelativeRedirect != null) { MoveRelativeRedirect(dx, dy); return; }
         var i = new INPUT { type = INPUT_MOUSE }; i.u.mi.dwFlags = MOUSEEVENTF_MOVE; i.u.mi.dx = dx; i.u.mi.dy = dy; Send(i);
     }
 }
@@ -157,6 +175,30 @@ function Deploy-Mod([string]$BinDir = (Join-Path $script:RepoRoot 'bin\BEI')) {
     Write-Step "deployed $BinDir -> $dest"
 }
 
+# Other mods in the instance (e.g. left by other projects' harnesses) are moved aside for the run
+# and put back afterwards, so only BEI is tested.
+$script:AsideDir = Join-Path $script:VersionDir 'mods.bei-e2e-aside'
+function Disable-OtherMods {
+    Restore-OtherMods
+    $others = @(Get-ChildItem $script:ModsDir -Directory -ErrorAction SilentlyContinue |
+        Where-Object { $_.Name -notin 'LeviLamina', 'BEI', 'LeviHeadlessInput' })
+    if (-not $others) { return }
+    New-Item -ItemType Directory -Force $script:AsideDir | Out-Null
+    foreach ($d in $others) { Move-Item -LiteralPath $d.FullName -Destination $script:AsideDir; Write-Step "moved mods\$($d.Name) aside" }
+}
+function Restore-OtherMods {
+    if (-not (Test-Path $script:AsideDir)) { return }
+    foreach ($d in Get-ChildItem $script:AsideDir -Directory) {
+        $dest = Join-Path $script:ModsDir $d.Name
+        if (Test-Path $dest) { Write-Host "[e2e] mods\$($d.Name) exists again; leaving the aside copy in $script:AsideDir" -ForegroundColor Yellow; continue }
+        for ($i = 0; $i -lt 10; $i++) {
+            try { Move-Item -LiteralPath $d.FullName -Destination $dest -ErrorAction Stop; Write-Step "restored mods\$($d.Name)"; break }
+            catch { Start-Sleep -Seconds 2 }
+        }
+    }
+    if (-not (Get-ChildItem $script:AsideDir)) { Remove-Item $script:AsideDir }
+}
+
 function Restore-TestWorld {
     $zip = Join-Path $script:RepoRoot 'tools\e2e\fixtures\BEI-Test.zip'
     if (-not (Test-Path $zip)) { Write-Step "no world fixture, skipping restore"; return }
@@ -168,24 +210,58 @@ function Restore-TestWorld {
     } | Remove-Item -Recurse -Force
     $target = Join-Path $worlds 'BEI-Test'
     Expand-Archive -Path $zip -DestinationPath $target -Force
+    Set-WorldLastPlayed $target   # first in the world list, where Enter-TestWorld clicks
     Write-Step "restored world fixture to $target"
+}
+
+# Sets LastPlayed (TAG_Long) in level.dat to now.
+function Set-WorldLastPlayed([string]$WorldDir) {
+    $name = [Text.Encoding]::UTF8.GetBytes('LastPlayed')
+    $pat = [byte[]](@([byte]4, [byte]$name.Length, [byte]0) + $name)
+    foreach ($f in 'level.dat', 'level.dat_old') {
+        $path = Join-Path $WorldDir $f
+        if (-not (Test-Path $path)) { continue }
+        $b = [IO.File]::ReadAllBytes($path)
+        for ($i = 8; $i -le $b.Length - $pat.Length - 8; $i++) {
+            $hit = $true
+            for ($j = 0; $j -lt $pat.Length; $j++) { if ($b[$i + $j] -ne $pat[$j]) { $hit = $false; break } }
+            if (-not $hit) { continue }
+            $v = [BitConverter]::GetBytes([long][DateTimeOffset]::UtcNow.ToUnixTimeSeconds())
+            [Array]::Copy($v, 0, $b, $i + $pat.Length, 8)
+            break
+        }
+        [IO.File]::WriteAllBytes($path, $b)
+    }
 }
 
 # ---------------------------------------------------------------------------------------
 # Game process / window
 # ---------------------------------------------------------------------------------------
-function Get-GameProcess { Get-Process -Name 'Minecraft.Windows' -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowHandle -ne 0 } | Select-Object -First 1 }
+# The games of this instance only (other harnesses may run games of other instances at the same
+# time): matched by the exe's folder.
+function Get-InstanceProcesses {
+    $dir = $script:VersionDir.TrimEnd('') + ''
+    Get-Process -Name 'Minecraft.Windows' -ErrorAction SilentlyContinue |
+        Where-Object { $_.Path -and $_.Path.StartsWith($dir, [StringComparison]::OrdinalIgnoreCase) }
+}
+function Get-GameProcess { Get-InstanceProcesses | Where-Object { $_.MainWindowHandle -ne 0 } | Select-Object -First 1 }
 
 function Start-Game([int]$TimeoutSeconds = 180) {
     if (Get-GameProcess) { throw "Minecraft is already running; close it first" }
     # latest.log is appended across sessions: remember where this session starts.
     $script:LogOffset = @(Get-LeviLog -All).Count
-    # A leftover launcher instance swallows --launch (single-instance hand-off) without starting
-    # the game, so close any running launcher first.
-    Get-Process -Name 'LeviLauncher' -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
-    Start-Sleep -Seconds 1
-    Write-Step "launching $script:VersionName via LeviLauncher"
-    Start-Process -FilePath $script:Launcher -ArgumentList "--launch=`"$script:VersionName`""
+    if ($script:Headless) {
+        # Straight from the instance folder, with a window that does not take the foreground.
+        Write-Step "launching $script:VersionName in the background"
+        & (Join-Path $script:HeadlessInputDir 'Start-HeadlessGame.ps1') -Instance $script:VersionName | Out-Null
+    } else {
+        # A leftover launcher instance swallows --launch (single-instance hand-off) without
+        # starting the game, so close any running launcher first.
+        Get-Process -Name 'LeviLauncher' -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+        Start-Sleep -Seconds 1
+        Write-Step "launching $script:VersionName via LeviLauncher"
+        Start-Process -FilePath $script:Launcher -ArgumentList "--launch=`"$script:VersionName`""
+    }
     $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
     while ((Get-Date) -lt $deadline) {
         $p = Get-GameProcess
@@ -196,11 +272,11 @@ function Start-Game([int]$TimeoutSeconds = 180) {
 }
 
 function Stop-Game {
-    Get-Process -Name 'Minecraft.Windows' -ErrorAction SilentlyContinue | ForEach-Object {
+    Get-InstanceProcesses | ForEach-Object {
         $_.CloseMainWindow() | Out-Null
         if (-not $_.WaitForExit(10000)) { $_.Kill() }
     }
-    Get-Process -Name 'LeviLauncher' -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+    if (-not $script:Headless) { Get-Process -Name 'LeviLauncher' -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue }
     Write-Step "game stopped"
 }
 

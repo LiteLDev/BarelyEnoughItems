@@ -14,7 +14,7 @@ Use the [issue templates](https://github.com/LiteLDev/BarelyEnoughItems/issues/n
 
 ## Development setup
 
-See [Building](README.md#building) in the README. [AGENTS.md](AGENTS.md) is the developer guide. It covers the layout of the code, the contracts between modules, threading and lifetime rules, and how to read the LeviLamina SDK headers. Please read it before changing anything under `src/`.
+See [Development](#development) below. [AGENTS.md](AGENTS.md) is the developer guide. It covers the layout of the code, the contracts between modules, threading and lifetime rules, and how to read the LeviLamina SDK headers. Please read it before changing anything under `src/`.
 
 ## Pull requests
 
@@ -32,3 +32,41 @@ Commit messages use the imperative mood ("Add anvil category", not "Added …").
 ## License
 
 By contributing you agree that your contributions are licensed under the [LGPL-3.0](COPYING.LESSER), the license of this project.
+
+## Development
+
+### Building
+
+You need Windows x64, [xmake](https://xmake.io), Visual Studio Build Tools with MSVC 14.4x or newer, and LLVM (`clang-cl`, on `PATH`).
+
+```powershell
+git config --global core.longpaths true
+xmake f -a x64 -m release -p windows --target_type=client -y   # add --vs=2026 for Visual Studio 18
+xmake -y                                                         # produces bin/BEI/
+```
+
+Copy `bin/BEI/` into the game's `mods/` folder (LeviLauncher) to try it.
+
+### Tests
+
+- Unit tests for the pure logic in `src/core`: `xmake build -y bei-tests; xmake run bei-tests`.
+- End-to-end tests drive the real game through LeviLauncher and take screenshots: see [tools/e2e](tools/e2e/README.md).
+  `pwsh tools/e2e/run.ps1 -Scenario smoke` is the quickest check.
+
+### Showcase media
+
+The pictures and videos in the README and on the [LeviMC Mods gallery](https://levimc.org/mods/github.com/LiteLDev/BarelyEnoughItems/?tab=gallery)
+live in [`docs/showcase/`](docs/showcase/) with the manifest `showcase.json`. They are reproducible:
+
+```powershell
+pwsh tools/e2e/run.ps1 -Scenario showcase      # stages the scenes, writes tools/e2e/out/showcase/
+pwsh tools/e2e/showcase-encode.ps1             # crops/encodes them into docs/showcase/
+```
+
+### How BEI works
+
+BEI runs entirely on the client. It reads the recipes the server already sends to every client, so it
+works in single-player and on any server without server-side installation. Icons, panels and text are
+drawn with the game's own item renderer and UI textures. The code layout, module contracts and the
+rules for working with Bedrock internals are in [AGENTS.md](AGENTS.md).
+

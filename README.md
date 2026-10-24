@@ -1,56 +1,30 @@
-# BEI
+# BEI — Barely Enough Items
 
 <img src="docs/logo.png" alt="" width="128" align="right">
 
-[![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg)](https://github.com/RichardLitt/standard-readme)
-[![Build](https://github.com/LiteLDev/BarelyEnoughItems/actions/workflows/build.yml/badge.svg)](https://github.com/LiteLDev/BarelyEnoughItems/actions/workflows/build.yml)
 [![Release](https://img.shields.io/github/v/release/LiteLDev/BarelyEnoughItems)](https://github.com/LiteLDev/BarelyEnoughItems/releases)
 [![License](https://img.shields.io/github/license/LiteLDev/BarelyEnoughItems)](COPYING.LESSER)
 
-Barely Enough Items: a JEI-style item list and recipe viewer for Minecraft Bedrock Edition, as a LeviLamina client mod.
+Never alt-tab to a wiki again. BEI puts every item in the game next to your inventory, and shows how to make it and what it is good for — [Just Enough Items (JEI)](https://github.com/mezz/JustEnoughItems) from Java Edition, now on Minecraft Bedrock for Windows.
 
-BEI brings what [Just Enough Items (JEI)](https://github.com/mezz/JustEnoughItems) does on Java Edition to Bedrock: browse every item, look up how to make it and what it is used for, and move a recipe's ingredients into the crafting grid with one click. It runs entirely on the client and reads the recipes the server already sends, so it works in single-player and on any server, and the server does not need to install anything.
+![The item list next to the survival inventory, with bookmarks on the left](docs/showcase/inventory.webp)
 
-## Table of Contents
+## Features
 
-- [Background](#background)
-- [Install](#install)
-- [Usage](#usage)
-  - [Item list](#item-list)
-  - [Recipes and uses](#recipes-and-uses)
-  - [Search syntax](#search-syntax)
-  - [Bookmarks](#bookmarks)
-  - [Cheat mode](#cheat-mode)
-  - [Settings](#settings)
-- [Building](#building)
-- [Maintainers](#maintainers)
-- [Contributing](#contributing)
-- [License](#license)
+- **Every item at hand** — a searchable item list beside the inventory, crafting table, furnace, chest and every other container.
+- **Recipes and uses** — press `R` on any item to see how to make it, `U` to see what it is used for: crafting, smelting, smithing, stonecutting, brewing, anvil repair, composting and more.
+- **One-click crafting** — the `+` button moves a recipe's ingredients from your inventory into the crafting grid or furnace.
+- **Smart search** — filter by name, tag, namespace or id, exclude words, and search Chinese names by pinyin.
+- **Bookmarks** — pin the items you keep looking up to a list on the left.
+- **Cheat mode** — with cheats on, click an item to take a stack.
 
-## Background
+![Typing a search into the item list](docs/showcase/search.webp)
 
-Bedrock Edition has a recipe book, but it only shows crafting recipes, it cannot tell you what an item is *used* for, and it cannot be extended. Java players have relied on JEI for this for over a decade. BEI is a port of that experience to Bedrock, built on [LeviLamina](https://github.com/LiteLDev/LeviLamina), which supports Bedrock clients on Windows.
-
-**Recipe categories:**
-- crafting, including special recipes such as banners, fireworks and map cloning, which are shown as examples;
-- smelting, blasting, smoking, campfire and soul campfire cooking;
-- fuel;
-- stonecutting, smithing, cartography and brewing;
-- anvil repair (repair materials and combining two damaged items) and composting chances;
-- any data-driven or add-on recipe type, which gets a generic page.
-
-**Item list:** all creative inventory items plus registry items that are missing from it, with localized names, item tags and creative groups.
-
-**Rendering:** the game's own item renderer and UI textures, so icons, enchantment glint and panels look exactly like vanilla.
-
-**Languages:** English and Simplified Chinese, including pinyin search.
+BEI only runs on your game: it works in single-player and on any server, and the server does not need it.
 
 ## Install
 
-Requirements:
-
-- Minecraft Bedrock Edition **1.26.51.01** for Windows (x64).
-- LeviLamina **26.51.x** client, for example installed through [LeviLauncher](https://github.com/LiteLDev/LeviLauncher).
+You need Minecraft Bedrock **1.26.51.01** for Windows (x64) with LeviLamina **26.51.x**, for example installed through [LeviLauncher](https://github.com/LiteLDev/LeviLauncher).
 
 With [lip](https://github.com/futrime/lip):
 
@@ -58,95 +32,68 @@ With [lip](https://github.com/futrime/lip):
 lip install github.com/LiteLDev/BarelyEnoughItems#client
 ```
 
-Manually: download `bei-client-windows-x64.zip` from the [latest release](https://github.com/LiteLDev/BarelyEnoughItems/releases/latest) and extract it so that `BEI/` ends up in the game's `mods/` folder, next to `LeviLamina/`.
+Or download `bei-client-windows-x64.zip` from the [latest release](https://github.com/LiteLDev/BarelyEnoughItems/releases/latest) and extract it so that the `BEI` folder lands in the game's `mods/` folder.
 
-## Usage
+## How to use
 
-Open any container screen (inventory, crafting table, furnace, chest, …). The item list appears on the right, and your bookmarks on the left.
+Open your inventory or any container. The item list is on the right, your bookmarks on the left.
 
-### Item list
+![Clicking + moves the ingredients into the crafting grid](docs/showcase/transfer.webp)
 
-| Action | Effect |
+| Key / click | What it does |
 | --- | --- |
-| Hover an item | Tooltip with the name, id and mod |
-| Left click | Show its recipes (in cheat mode: take a stack) |
-| Right click | Show its uses (in cheat mode: take one) |
-| Mouse wheel, `<` `>` | Change page |
-| Click the search bar | Type to filter; right click clears it, `↑` `↓` recall earlier searches |
-
-### Recipes and uses
-
-These keys work over BEI's panels, over vanilla inventory slots and inside the recipe screen. All of them can be remapped in *Settings → Keyboard & Mouse*.
-
-| Key | Effect |
-| --- | --- |
-| `R` | Recipes that make the hovered item |
-| `U` | Recipes that use the hovered item. For a workstation, such as a furnace, this lists everything it can make. |
-| `Backspace` | Back to the previous page |
+| `R` or left click | Recipes for the item under the mouse |
+| `U` or right click | Uses of the item under the mouse (on a furnace or other workstation: everything it makes) |
+| `+` next to a recipe | Move the ingredients into the open crafting grid, furnace or smithing table. `Shift`-click moves as many as you can make. Missing ingredients turn red. |
 | `A` | Add or remove a bookmark |
+| `Backspace` | Back to the previous recipe page |
 | `O` | Show or hide the item list |
-| `Ctrl` + `F` | Focus the search bar |
+| `Ctrl` + `F` | Jump to the search bar (`↑` `↓` bring back earlier searches, right click clears it) |
+| Mouse wheel, `<` `>` | Turn pages |
 
-In the recipe screen, click a tab to switch category and use the mouse wheel to page. Left click an ingredient to see its recipes, right click it to see its uses, and click a workstation on the left to see every recipe of that category.
+The keys work over the item list, over your own inventory slots and inside the recipe page, and you can change them in *Settings → Keyboard & Mouse*. In the recipe page, click a tab to switch category, click an ingredient for its recipes (right click for its uses), and click a workstation on the left to see everything it makes.
 
-The **`+`** button next to a recipe moves its ingredients from your inventory into the open crafting grid, furnace or smithing table. Shift-click moves as many sets as you have. Ingredients you are missing are tinted red.
+### Search
 
-### Search syntax
-
-| Query | Matches |
+| Type | To find |
 | --- | --- |
 | `oak planks` | Items whose name contains both words |
 | `stone\|dirt` | Either word |
-| `-slab` | Exclude items matching the term |
-| `@minecraft` | Items from a namespace |
-| `#planks` | Items with a matching item tag |
+| `-slab` | Everything except slabs |
+| `@minecraft` | Items from one namespace (mod or add-on) |
+| `#planks` | Items with that item tag |
 | `$oak_` | Items whose id contains the text |
-| `"red wool"` | An exact phrase |
+| `"red wool"` | That exact phrase |
 | `mb`, `muban`, `木板` | Chinese names by pinyin initials, full pinyin or characters |
-
-### Bookmarks
-
-Press `A` over any item to pin it to the bookmark list on the left. Bookmarks are saved to `mods/BEI/config/bookmarks.json`.
 
 ### Cheat mode
 
-When you are allowed to use commands (an operator, or a world with cheats enabled), cheat mode lets you click items in the list to take them. While it is on:
+If you may use commands (operator, or cheats enabled in the world), `Ctrl`-click the settings button next to the search bar. The button turns red, and clicking the list gives you items: left click a stack, right click or `Shift`-click one. In creative mode, clicking the list while holding an item deletes it.
 
-- left click takes a stack;
-- right click or shift-click takes one;
-- in creative mode, clicking the list while holding an item deletes it.
+## Settings
 
-To turn it on, `Ctrl`-click the settings button next to the search bar.
+Click the settings button next to the search bar:
 
-### Settings
+| Option | |
+| --- | --- |
+| Cheat mode | Click items in the list to take them |
+| Bookmark panel | Show the bookmarks on the left |
+| Add new bookmarks to the front | Newest bookmark first |
+| Search bar under the container | Center the search bar below the inventory |
+| Show item ids / mod name in tooltips | Extra tooltip lines |
+| Remember the item list page | Reopen the list where you left it |
+| Show on all container screens | Off: only on the inventory and the crafting table |
+| Max columns | Make the item list narrower |
 
-Click the settings button next to the search bar for in-game options: cheat mode, bookmarks, search bar position, item ids in tooltips and more. They are saved to `mods/BEI/config/config.json`.
+Settings and bookmarks are saved in `mods/BEI/config/` (`config.json`, `bookmarks.json`).
 
-## Building
+## More
 
-You need Windows x64, [xmake](https://xmake.io), Visual Studio Build Tools with MSVC 14.4x or newer, and LLVM (`clang-cl`).
+More screenshots and videos: https://levimc.org/mods/github.com/LiteLDev/BarelyEnoughItems/?tab=gallery
 
-```powershell
-git config --global core.longpaths true
-xmake f -a x64 -m release -p windows --target_type=client -y
-xmake -y                                    # produces bin/BEI/
-xmake build -y bei-tests; xmake run bei-tests
-```
-
-[AGENTS.md](AGENTS.md) describes the architecture, the conventions and the rules for working with Bedrock internals. [tools/e2e](tools/e2e/README.md) is the end-to-end test harness that drives the real game.
-
-## Maintainers
-
-[@futrime (Zijian Zhang)](https://github.com/futrime)
-
-## Contributing
-
-PRs and issues are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) and follow the [Code of Conduct](CODE_OF_CONDUCT.md). Report security issues as described in [SECURITY.md](SECURITY.md).
+Found a bug or have an idea? [Open an issue](https://github.com/LiteLDev/BarelyEnoughItems/issues/new/choose).
+Building it yourself or contributing? See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
-LGPL-3.0 © 2026 Zijian Zhang
-
-BEI is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License version 3, the same license as LeviLamina. See [COPYING.LESSER](COPYING.LESSER) and [COPYING](COPYING).
-
-BEI is not affiliated with Mojang Studios, Microsoft, or the JEI project.
+[LGPL-3.0](COPYING.LESSER) © 2026 Zijian Zhang. BEI is not affiliated with Mojang Studios, Microsoft or the JEI project.

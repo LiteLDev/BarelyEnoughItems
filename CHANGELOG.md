@@ -10,6 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - A logo (`docs/logo.png`), shown on [LeviMC Mods](https://levimc.org/mods/) through `avatar_url` in `tooth.json`.
+- Screenshots and videos in `docs/showcase/` (with `showcase.json` for the LeviMC Mods gallery), captured by the new `showcase` end-to-end scenario.
+
+### Changed
+
+- The README is now written for players; building, tests and the showcase tooling moved to [CONTRIBUTING.md](CONTRIBUTING.md#development).
+- End-to-end tests run in the background through [LeviHeadlessInput](https://github.com/LiteLDev/LeviHeadlessInput) by default (`-Foreground` for real input), only touch the games of their own instance, and move other mods aside for the run.
 
 ## [0.1.1] - 2026-10-21
 
