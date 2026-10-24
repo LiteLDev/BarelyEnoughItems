@@ -1,5 +1,7 @@
 # BEI
 
+<img src="docs/logo.png" alt="" width="128" align="right">
+
 [![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg)](https://github.com/RichardLitt/standard-readme)
 [![Build](https://github.com/LiteLDev/BarelyEnoughItems/actions/workflows/build.yml/badge.svg)](https://github.com/LiteLDev/BarelyEnoughItems/actions/workflows/build.yml)
 [![Release](https://img.shields.io/github/v/release/LiteLDev/BarelyEnoughItems)](https://github.com/LiteLDev/BarelyEnoughItems/releases)
