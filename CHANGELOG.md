@@ -7,15 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-10-24
+
 ### Added
 
-- A logo (`docs/logo.png`), shown on [LeviMC Mods](https://levimc.org/mods/) through `avatar_url` in `tooth.json`.
-- Screenshots and videos in `docs/showcase/` (with `showcase.json` for the LeviMC Mods gallery), captured by the new `showcase` end-to-end scenario.
+- A logo, and screenshots and videos of search, recipes, one-click transfer and bookmarks in the [LeviMC Mods gallery](https://levimc.org/mods/github.com/LiteLDev/BarelyEnoughItems/?tab=gallery).
 
 ### Changed
 
-- The README is now written for players; building, tests and the showcase tooling moved to [CONTRIBUTING.md](CONTRIBUTING.md#development).
-- End-to-end tests run in the background through [LeviHeadlessInput](https://github.com/LiteLDev/LeviHeadlessInput) by default (`-Foreground` for real input), only touch the games of their own instance, and move other mods aside for the run.
+- A shorter README written for players. Notes for developers moved to [CONTRIBUTING.md](CONTRIBUTING.md#development).
 
 ## [0.1.1] - 2026-10-21
 
@@ -70,6 +70,7 @@ First release.
 - **In-game settings** popup (wrench button next to the search bar). `Ctrl`-click it to toggle cheat mode.
 - **Translations**: English and Simplified Chinese.
 
-[Unreleased]: https://github.com/LiteLDev/BarelyEnoughItems/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/LiteLDev/BarelyEnoughItems/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/LiteLDev/BarelyEnoughItems/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/LiteLDev/BarelyEnoughItems/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/LiteLDev/BarelyEnoughItems/releases/tag/v0.1.0
