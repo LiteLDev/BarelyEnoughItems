@@ -1,4 +1,4 @@
-# BEI — Barely Enough Items
+# BarelyEnoughItems (BEI)
 
 <img src="docs/logo.png" alt="" width="128" align="right">
 
@@ -24,9 +24,9 @@ BEI only runs on your game: it works in single-player and on any server, and the
 
 ## Install
 
-You need Minecraft Bedrock **1.26.51.01** for Windows (x64) with LeviLamina **26.51.x**, for example installed through [LeviLauncher](https://github.com/LiteLDev/LeviLauncher).
+You need Minecraft Bedrock Edition **1.26.51** for Windows (x64) with LeviLamina **26.51.x**, for example installed through [LeviLauncher](https://github.com/LiteLDev/LeviLauncher).
 
-With [lip](https://github.com/futrime/lip):
+With [lip](https://github.com/LiteLDev/lip):
 
 ```sh
 lip install github.com/LiteLDev/BarelyEnoughItems#client
@@ -96,4 +96,4 @@ Building it yourself or contributing? See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
-[LGPL-3.0](COPYING.LESSER) © 2026 Zijian Zhang. BEI is not affiliated with Mojang Studios, Microsoft or the JEI project.
+[LGPL-3.0-or-later](COPYING.LESSER) © LeviMC. BEI is not affiliated with Mojang Studios, Microsoft or the JEI project.

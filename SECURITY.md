@@ -2,7 +2,7 @@
 
 ## Supported versions
 
-Only the latest release of BEI receives fixes.
+Only the latest release of BarelyEnoughItems receives fixes.
 
 ## Reporting a vulnerability
 

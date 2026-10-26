@@ -1,4 +1,4 @@
-# Contributing to BEI
+# Contributing to BarelyEnoughItems
 
 Thanks for helping! Bug reports, ideas and pull requests are all welcome.
 
@@ -28,10 +28,6 @@ See [Development](#development) below. [AGENTS.md](AGENTS.md) is the developer g
 7. CI must pass before a pull request is merged.
 
 Commit messages use the imperative mood ("Add anvil category", not "Added …"). Update [CHANGELOG.md](CHANGELOG.md) under *Unreleased* for user-visible changes.
-
-## License
-
-By contributing you agree that your contributions are licensed under the [LGPL-3.0](COPYING.LESSER), the license of this project.
 
 ## Development
 
@@ -63,10 +59,14 @@ pwsh tools/e2e/run.ps1 -Scenario showcase      # stages the scenes, writes tools
 pwsh tools/e2e/showcase-encode.ps1             # crops/encodes them into docs/showcase/
 ```
 
-### How BEI works
+### How it works
 
 BEI runs entirely on the client. It reads the recipes the server already sends to every client, so it
 works in single-player and on any server without server-side installation. Icons, panels and text are
 drawn with the game's own item renderer and UI textures. The code layout, module contracts and the
 rules for working with Bedrock internals are in [AGENTS.md](AGENTS.md).
+
+## License
+
+By contributing you agree that your contributions are licensed under the [LGPL-3.0-or-later](COPYING.LESSER), the license of this project.
 
